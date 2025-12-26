@@ -3,9 +3,7 @@ package org.dromara.system.service.impl;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.constant.SystemConstants;
@@ -18,6 +16,8 @@ import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
 import org.dromara.common.redis.utils.CacheUtils;
 import org.dromara.common.tenant.helper.TenantHelper;
 import org.dromara.system.domain.SysConfig;
@@ -78,7 +78,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
     @Override
     public String selectConfigByKey(String configKey) {
         SysConfig retConfig = baseMapper.selectOne(new LambdaQueryWrapper<SysConfig>()
-            .eq(SysConfig::getConfigKey, configKey));
+                .eq(SysConfig::getConfigKey, configKey));
         return ObjectUtils.notNullGetter(retConfig, SysConfig::getConfigValue, StringUtils.EMPTY);
     }
 
@@ -90,9 +90,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
      */
     @Override
     public boolean selectRegisterEnabled(String tenantId) {
-        String configValue = TenantHelper.dynamic(tenantId, () ->
-            this.selectConfigByKey("sys.account.registerUser")
-        );
+        String configValue = TenantHelper.dynamic(tenantId, () -> this.selectConfigByKey("sys.account.registerUser"));
         return Convert.toBool(configValue);
     }
 
@@ -115,7 +113,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
         lqw.eq(StringUtils.isNotBlank(bo.getConfigType()), SysConfig::getConfigType, bo.getConfigType());
         lqw.like(StringUtils.isNotBlank(bo.getConfigKey()), SysConfig::getConfigKey, bo.getConfigKey());
         lqw.between(params.get("beginTime") != null && params.get("endTime") != null,
-            SysConfig::getCreateTime, params.get("beginTime"), params.get("endTime"));
+                SysConfig::getCreateTime, params.get("beginTime"), params.get("endTime"));
         lqw.orderByAsc(SysConfig::getConfigId);
         return lqw;
     }
@@ -157,7 +155,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
         } else {
             CacheUtils.evict(CacheNames.SYS_CONFIG, config.getConfigKey());
             row = baseMapper.update(config, new LambdaQueryWrapper<SysConfig>()
-                .eq(SysConfig::getConfigKey, config.getConfigKey()));
+                    .eq(SysConfig::getConfigKey, config.getConfigKey()));
         }
         if (row > 0) {
             return config.getConfigValue();
@@ -179,7 +177,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
             }
             CacheUtils.evict(CacheNames.SYS_CONFIG, config.getConfigKey());
         });
-        baseMapper.deleteByIds(configIds);
+        baseMapper.deleteBatchIds(configIds);
     }
 
     /**
@@ -198,10 +196,12 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
      */
     @Override
     public boolean checkConfigKeyUnique(SysConfigBo config) {
-        boolean exist = baseMapper.exists(new LambdaQueryWrapper<SysConfig>()
-            .eq(SysConfig::getConfigKey, config.getConfigKey())
-            .ne(ObjectUtil.isNotNull(config.getConfigId()), SysConfig::getConfigId, config.getConfigId()));
-        return !exist;
+        LambdaQueryWrapper<SysConfig> lqw = new LambdaQueryWrapper<SysConfig>()
+                .eq(SysConfig::getConfigKey, config.getConfigKey());
+        if (ObjectUtil.isNotNull(config.getConfigId())) {
+            lqw.ne(SysConfig::getConfigId, config.getConfigId());
+        }
+        return !baseMapper.exists(lqw);
     }
 
     /**

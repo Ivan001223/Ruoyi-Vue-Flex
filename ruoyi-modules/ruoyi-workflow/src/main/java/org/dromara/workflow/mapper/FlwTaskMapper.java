@@ -1,14 +1,11 @@
 package org.dromara.workflow.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.workflow.domain.bo.FlowTaskBo;
 import org.dromara.workflow.domain.vo.FlowHisTaskVo;
 import org.dromara.workflow.domain.vo.FlowTaskVo;
-
 
 /**
  * 任务信息Mapper接口
@@ -25,7 +22,7 @@ public interface FlwTaskMapper {
      * @param queryWrapper 条件
      * @return 结果
      */
-    Page<FlowTaskVo> getListRunTask(@Param("page") Page<FlowTaskVo> page, @Param(Constants.WRAPPER) Wrapper<FlowTaskBo> queryWrapper);
+    Page<FlowTaskVo> getListRunTask(@Param("page") Page<FlowTaskVo> page, @Param("ew") QueryWrapper queryWrapper);
 
     /**
      * 获取已办
@@ -34,7 +31,7 @@ public interface FlwTaskMapper {
      * @param queryWrapper 条件
      * @return 结果
      */
-    Page<FlowHisTaskVo> getListFinishTask(@Param("page") Page<FlowTaskVo> page, @Param(Constants.WRAPPER) Wrapper<FlowTaskBo> queryWrapper);
+    Page<FlowHisTaskVo> getListFinishTask(@Param("page") Page<FlowTaskVo> page, @Param("ew") QueryWrapper queryWrapper);
 
     /**
      * 查询当前用户的抄送
@@ -43,5 +40,5 @@ public interface FlwTaskMapper {
      * @param queryWrapper 条件
      * @return 结果
      */
-    Page<FlowTaskVo> getTaskCopyByPage(@Param("page") Page<FlowTaskVo> page, @Param(Constants.WRAPPER) QueryWrapper<FlowTaskBo> queryWrapper);
+    Page<FlowTaskVo> getTaskCopyByPage(@Param("page") Page<FlowTaskVo> page, @Param("ew") QueryWrapper queryWrapper);
 }

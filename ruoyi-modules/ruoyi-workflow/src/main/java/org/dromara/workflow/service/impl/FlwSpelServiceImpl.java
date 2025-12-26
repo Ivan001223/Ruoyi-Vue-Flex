@@ -1,9 +1,10 @@
 package org.dromara.workflow.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import cn.hutool.core.util.ObjectUtil;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.SystemConstants;
@@ -48,7 +49,7 @@ public class FlwSpelServiceImpl implements IFlwSpelService {
      * @return 流程spel表达式定义
      */
     @Override
-    public FlowSpelVo queryById(Long id){
+    public FlowSpelVo queryById(Long id) {
         return baseMapper.selectVoById(id);
     }
 
@@ -118,14 +119,14 @@ public class FlwSpelServiceImpl implements IFlwSpelService {
     public Boolean updateByBo(FlowSpelBo bo) {
         FlowSpel update = MapstructUtils.convert(bo, FlowSpel.class);
         validEntityBeforeSave(update);
-        return baseMapper.updateById(update) > 0;
+        return baseMapper.updateById(update);
     }
 
     /**
      * 保存前的数据校验
      */
-    private void validEntityBeforeSave(FlowSpel entity){
-        //TODO 做一些数据校验,如唯一约束
+    private void validEntityBeforeSave(FlowSpel entity) {
+        // TODO 做一些数据校验,如唯一约束
     }
 
     /**
@@ -137,10 +138,10 @@ public class FlwSpelServiceImpl implements IFlwSpelService {
      */
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        if(isValid){
-            //TODO 做一些业务上的校验,判断是否需要校验
+        if (isValid) {
+            // TODO 做一些业务上的校验,判断是否需要校验
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return baseMapper.deleteBatchIds(ids) > 0;
     }
 
     /**
@@ -162,7 +163,7 @@ public class FlwSpelServiceImpl implements IFlwSpelService {
         TableDataInfo<FlowSpelVo> page = this.queryPageList(bo, pageQuery);
         // 使用封装的字段映射方法进行转换
         List<TaskAssigneeDTO.TaskHandler> handlers = TaskAssigneeDTO.convertToHandlerList(page.getRows(),
-            FlowSpelVo::getViewSpel, item -> "", FlowSpelVo::getRemark, item -> "", FlowSpelVo::getCreateTime);
+                FlowSpelVo::getViewSpel, item -> "", FlowSpelVo::getRemark, item -> "", FlowSpelVo::getCreateTime);
         return new TaskAssigneeDTO(page.getTotal(), handlers);
     }
 
@@ -177,14 +178,12 @@ public class FlwSpelServiceImpl implements IFlwSpelService {
         if (CollUtil.isEmpty(viewSpels)) {
             return Collections.emptyMap();
         }
-        List<FlowSpel> list = baseMapper.selectList(
-            new LambdaQueryWrapper<FlowSpel>()
-                .select(FlowSpel::getViewSpel, FlowSpel::getRemark)
-                .in(FlowSpel::getViewSpel, viewSpels)
-        );
-        return StreamUtils.toMap(list, FlowSpel::getViewSpel, x ->
-            StringUtils.isEmpty(x.getRemark()) ? "" : x.getRemark()
-        );
+        List<FlowSpel> list = baseMapper.selectListByQuery(
+                new LambdaQueryWrapper<FlowSpel>()
+                        .select(FlowSpel::getViewSpel, FlowSpel::getRemark)
+                        .in(FlowSpel::getViewSpel, viewSpels));
+        return StreamUtils.toMap(list, FlowSpel::getViewSpel,
+                x -> StringUtils.isEmpty(x.getRemark()) ? "" : x.getRemark());
     }
 
 }

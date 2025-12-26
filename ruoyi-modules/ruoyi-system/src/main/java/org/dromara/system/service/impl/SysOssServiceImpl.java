@@ -3,9 +3,7 @@ package org.dromara.system.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.CacheNames;
@@ -20,6 +18,8 @@ import org.dromara.common.core.utils.file.FileUtils;
 import org.dromara.common.json.utils.JsonUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
 import org.dromara.common.oss.core.OssClient;
 import org.dromara.common.oss.entity.UploadResult;
 import org.dromara.common.oss.enums.AccessPolicyType;
@@ -145,7 +145,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
         lqw.eq(StringUtils.isNotBlank(bo.getFileSuffix()), SysOss::getFileSuffix, bo.getFileSuffix());
         lqw.eq(StringUtils.isNotBlank(bo.getUrl()), SysOss::getUrl, bo.getUrl());
         lqw.between(params.get("beginCreateTime") != null && params.get("endCreateTime") != null,
-            SysOss::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
+                SysOss::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
         lqw.eq(ObjectUtil.isNotNull(bo.getCreateBy()), SysOss::getCreateBy, bo.getCreateBy());
         lqw.eq(StringUtils.isNotBlank(bo.getService()), SysOss::getService, bo.getService());
         lqw.orderByAsc(SysOss::getOssId);
@@ -163,7 +163,6 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     public SysOssVo getById(Long ossId) {
         return baseMapper.selectVoById(ossId);
     }
-
 
     /**
      * 文件下载方法，支持一次性下载完整文件
@@ -196,7 +195,8 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
             throw new ServiceException("上传文件不能为空");
         }
         String originalfileName = file.getOriginalFilename();
-        String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
+        String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."),
+                originalfileName.length());
         OssClient storage = OssFactory.instance();
         UploadResult uploadResult;
         try {
@@ -223,7 +223,8 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
             throw new ServiceException("上传文件不能为空");
         }
         String originalfileName = file.getName();
-        String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."), originalfileName.length());
+        String suffix = StringUtils.substring(originalfileName, originalfileName.lastIndexOf("."),
+                originalfileName.length());
         OssClient storage = OssFactory.instance();
         long length = file.length();
         UploadResult uploadResult = storage.uploadSuffix(file, suffix);
@@ -234,7 +235,8 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
     }
 
     @NotNull
-    private SysOssVo buildResultEntity(String originalfileName, String suffix, String configKey, UploadResult uploadResult, SysOssExt ext1) {
+    private SysOssVo buildResultEntity(String originalfileName, String suffix, String configKey,
+            UploadResult uploadResult, SysOssExt ext1) {
         SysOss oss = new SysOss();
         oss.setUrl(uploadResult.getUrl());
         oss.setFileSuffix(suffix);
@@ -264,7 +266,7 @@ public class SysOssServiceImpl implements ISysOssService, OssService {
             OssClient storage = OssFactory.instance(sysOss.getService());
             storage.delete(sysOss.getUrl());
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return baseMapper.deleteBatchIds(ids) > 0;
     }
 
     /**

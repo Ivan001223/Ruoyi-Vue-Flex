@@ -1,8 +1,8 @@
 package org.dromara.workflow.domain;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.Table;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.common.mybatis.core.domain.BaseEntity;
@@ -17,7 +17,7 @@ import java.io.Serial;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("flow_spel")
+@Table("flow_spel")
 public class FlowSpel extends BaseEntity {
 
     @Serial
@@ -26,7 +26,7 @@ public class FlowSpel extends BaseEntity {
     /**
      * 主键id
      */
-    @TableId(value = "id")
+    @Id(value = "id")
     private Long id;
 
     /**
@@ -62,8 +62,7 @@ public class FlowSpel extends BaseEntity {
     /**
      * 删除标志
      */
-    @TableLogic
+    @Column(isLogicDelete = true)
     private String delFlag;
-
 
 }

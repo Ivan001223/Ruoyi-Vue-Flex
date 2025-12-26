@@ -2,13 +2,12 @@ package org.dromara.common.mybatis.handler;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.mybatisflex.core.FlexGlobalConfig;
+import com.mybatisflex.core.handler.DataPermissionHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.dromara.common.core.domain.dto.RoleDTO;
 import org.dromara.common.core.domain.model.LoginUser;
 import org.dromara.common.core.exception.ServiceException;
@@ -30,13 +29,12 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * 数据权限过滤
+ * 数据权限处理器
  *
  * @author Lion Li
- * @version 3.5.0
  */
 @Slf4j
-public class PlusDataPermissionHandler {
+public class FlexDataPermissionHandler implements DataPermissionHandler {
 
     /**
      * spel 解析器
@@ -48,54 +46,49 @@ public class PlusDataPermissionHandler {
      */
     private final BeanResolver beanResolver = new BeanFactoryResolver(SpringUtils.getBeanFactory());
 
-    /**
-     * 获取数据过滤条件的 SQL 片段
-     *
-     * @param where             原始的查询条件表达式
-     * @param isSelect          是否为查询语句
-     * @return 数据过滤条件的 SQL 片段
-     */
-    public Expression getSqlSegment(Expression where, boolean isSelect) {
-        try {
-            // 获取数据权限配置
-            DataPermission dataPermission = getDataPermission();
-            // 获取当前登录用户信息
-            LoginUser currentUser = DataPermissionHelper.getVariable("user");
-            if (ObjectUtil.isNull(currentUser)) {
-                currentUser = LoginHelper.getLoginUser();
-                DataPermissionHelper.setVariable("user", currentUser);
-            }
-            // 如果是超级管理员或租户管理员，则不过滤数据
-            if (LoginHelper.isSuperAdmin() || LoginHelper.isTenantAdmin()) {
-                return where;
-            }
-            // 构造数据过滤条件的 SQL 片段
-            String dataFilterSql = buildDataFilter(dataPermission, isSelect);
-            if (StringUtils.isBlank(dataFilterSql)) {
-                return where;
-            }
-            Expression expression = CCJSqlParserUtil.parseExpression(dataFilterSql);
-            // 数据权限使用单独的括号 防止与其他条件冲突
-            ParenthesedExpressionList<Expression> parenthesis = new ParenthesedExpressionList<>(expression);
-            if (ObjectUtil.isNotNull(where)) {
-                return new AndExpression(where, parenthesis);
-            } else {
-                return parenthesis;
-            }
-        } catch (JSQLParserException e) {
-            throw new ServiceException("数据权限解析异常 => " + e.getMessage());
-        } finally {
-            DataPermissionHelper.removePermission();
+    @Override
+    public String getSqlCondition(String tableName, String[] tableAlias, String logicTableName, String methodId) {
+        // 检查是否忽略
+        if (DataPermissionHelper.isIgnore()) {
+            return null;
         }
+        // 如果是超级管理员或租户管理员，则不过滤数据
+        if (LoginHelper.isSuperAdmin() || LoginHelper.isTenantAdmin()) {
+            return null;
+        }
+
+        // 获取数据权限配置
+        DataPermission dataPermission = DataPermissionHelper.getPermission();
+        if (dataPermission == null) {
+            return null;
+        }
+
+        // 获取当前登录用户信息
+        LoginUser currentUser = DataPermissionHelper.getVariable("user");
+        if (ObjectUtil.isNull(currentUser)) {
+            currentUser = LoginHelper.getLoginUser();
+            DataPermissionHelper.setVariable("user", currentUser);
+        }
+
+        boolean isSelect = true;
+        try {
+            MappedStatement ms = FlexGlobalConfig.getDefaultConfig().getConfiguration().getMappedStatement(methodId);
+            if (ms != null) {
+                isSelect = ms.getSqlCommandType() == SqlCommandType.SELECT;
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+
+        return buildDataFilter(dataPermission, isSelect);
     }
 
     /**
      * 构建数据过滤条件的 SQL 语句
      *
      * @param dataPermission 数据权限注解
-     * @param isSelect       标志当前操作是否为查询操作，查询操作和更新或删除操作在处理过滤条件时会有不同的处理方式
+     * @param isSelect       标志当前操作是否为查询操作
      * @return 构建的数据过滤条件的 SQL 语句
-     * @throws ServiceException 如果角色的数据范围异常或者 key 与 value 的长度不匹配，则抛出 ServiceException 异常
      */
     private String buildDataFilter(DataPermission dataPermission, boolean isSelect) {
         // 更新或删除需满足所有条件
@@ -119,8 +112,7 @@ public class PlusDataPermissionHandler {
             }
             // 包含权限标识符 这直接跳过
             if (StringUtils.isNotBlank(dataColumn.permission()) &&
-                CollUtil.contains(user.getMenuPermission(), dataColumn.permission())
-            ) {
+                    CollUtil.contains(user.getMenuPermission(), dataColumn.permission())) {
                 ignoreMap.put(dataColumn, Boolean.TRUE);
                 continue;
             }
@@ -140,13 +132,13 @@ public class PlusDataPermissionHandler {
             }
             // 全部数据权限直接返回
             if (type == DataScopeType.ALL) {
-                return StringUtils.EMPTY;
+                return null;
             }
             boolean isSuccess = false;
             for (DataColumn dataColumn : dataPermission.value()) {
                 // 包含权限标识符 这直接跳过
                 if (ignoreMap.containsKey(dataColumn)) {
-                    // 修复多角色与权限标识符共用问题 https://gitee.com/dromara/RuoYi-Vue-Plus/issues/IB4CS4
+                    // 修复多角色与权限标识符共用问题
                     conditions.add(joinStr + " 1 = 1 ");
                     isSuccess = true;
                     continue;
@@ -160,9 +152,8 @@ public class PlusDataPermissionHandler {
                     continue;
                 }
                 // 忽略数据权限 防止spel表达式内有其他sql查询导致死循环调用
-                String sql = DataPermissionHelper.ignore(() ->
-                    parser.parseExpression(type.getSqlTemplate(), parserContext).getValue(context, String.class)
-                );
+                String sql = DataPermissionHelper.ignore(() -> parser
+                        .parseExpression(type.getSqlTemplate(), parserContext).getValue(context, String.class));
                 // 解析sql模板并填充
                 conditions.add(joinStr + sql);
                 isSuccess = true;
@@ -175,27 +166,13 @@ public class PlusDataPermissionHandler {
 
         if (CollUtil.isNotEmpty(conditions)) {
             String sql = StreamUtils.join(conditions, Function.identity(), "");
-            return sql.substring(joinStr.length());
+            // Remove leading condition operator (OR/AND)
+            if (sql.startsWith(joinStr)) {
+                sql = sql.substring(joinStr.length());
+            }
+            return "(" + sql + ")";
         }
-        return StringUtils.EMPTY;
-    }
-
-    /**
-     * 根据映射语句 ID 或类名获取对应的 DataPermission 注解对象
-     *
-     * @return DataPermission 注解对象，如果不存在则返回 null
-     */
-    public DataPermission getDataPermission() {
-        return DataPermissionHelper.getPermission();
-    }
-
-    /**
-     * 检查给定的映射语句 ID 是否有效，即是否能够找到对应的 DataPermission 注解对象
-     *
-     * @return 如果找到对应的 DataPermission 注解对象，则返回 false；否则返回 true
-     */
-    public boolean invalid() {
-        return getDataPermission() == null;
+        return null;
     }
 
     /**
@@ -253,9 +230,9 @@ public class PlusDataPermissionHandler {
         }
 
         @Override
-        public void write(EvaluationContext context, Object target, String name, Object newValue) throws AccessException {
+        public void write(EvaluationContext context, Object target, String name, Object newValue)
+                throws AccessException {
             delegate.write(context, target, name, newValue);
         }
     }
-
 }

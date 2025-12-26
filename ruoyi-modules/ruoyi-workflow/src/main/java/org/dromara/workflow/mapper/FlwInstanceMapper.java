@@ -1,8 +1,7 @@
 package org.dromara.workflow.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.workflow.domain.bo.FlowInstanceBo;
 import org.dromara.workflow.domain.vo.FlowInstanceVo;
@@ -22,6 +21,7 @@ public interface FlwInstanceMapper {
      * @param queryWrapper 条件
      * @return 结果
      */
-    Page<FlowInstanceVo> selectInstanceList(@Param("page") Page<FlowInstanceVo> page, @Param(Constants.WRAPPER) Wrapper<FlowInstanceBo> queryWrapper);
+    Page<FlowInstanceVo> selectInstanceList(@Param("page") Page<FlowInstanceVo> page,
+            @Param("ew") QueryWrapper queryWrapper);
 
 }

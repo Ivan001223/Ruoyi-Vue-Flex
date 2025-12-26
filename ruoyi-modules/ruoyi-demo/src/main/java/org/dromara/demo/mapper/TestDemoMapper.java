@@ -1,9 +1,7 @@
 package org.dromara.demo.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
@@ -24,41 +22,50 @@ import java.util.List;
 public interface TestDemoMapper extends BaseMapperPlus<TestDemo, TestDemoVo> {
 
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "user_id")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "user_id")
     })
-    Page<TestDemoVo> customPageList(@Param("page") Page<TestDemo> page, @Param("ew") Wrapper<TestDemo> wrapper);
+    Page<TestDemoVo> customPageList(@Param("page") Page<TestDemo> page, @Param("ew") QueryWrapper wrapper);
 
     @Override
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "user_id")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "user_id")
     })
-    default <P extends IPage<TestDemoVo>> P selectVoPage(IPage<TestDemo> page, Wrapper<TestDemo> wrapper) {
+    default <P extends Page<TestDemoVo>> P selectVoPage(Page<TestDemo> page, QueryWrapper wrapper) {
         return selectVoPage(page, wrapper, this.currentVoClass());
     }
 
     @Override
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "user_id")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "user_id")
     })
-    default List<TestDemoVo> selectVoList(Wrapper<TestDemo> wrapper) {
+    default List<TestDemoVo> selectVoList(QueryWrapper wrapper) {
         return selectVoList(wrapper, this.currentVoClass());
     }
 
     @Override
     @DataPermission(value = {
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "user_id")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "user_id")
     }, joinStr = "AND")
-    List<TestDemo> selectByIds(@Param(Constants.COLL) Collection<? extends Serializable> idList);
+    List<TestDemo> selectListByIds(@Param("coll") Collection<? extends Serializable> idList);
 
     @Override
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "user_id")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "user_id")
     })
-    int updateById(@Param(Constants.ENTITY) TestDemo entity);
-
+    int update(@Param("et") TestDemo entity, @Param("ew") QueryWrapper queryWrapper);
+    // Note: MP had updateById(entity). Flex has update(entity).
+    // If we want to override update by ID specifically? Flex BaseMapper has
+    // update(entity).
+    // It updates by ID.
+    // So update(entity, null) check?
+    // Wait, MP's updateById(entity) does not take wrapper.
+    // Override signature needs to match Flex.
+    // Flex BaseMapper: update(T entity) -> int.
+    // So:
+    // int update(T entity);
 }

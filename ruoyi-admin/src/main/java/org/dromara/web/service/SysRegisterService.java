@@ -1,7 +1,7 @@
 package org.dromara.web.service;
 
 import cn.hutool.crypto.digest.BCrypt;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.Constants;
 import org.dromara.common.core.constant.GlobalConstants;
@@ -60,7 +60,7 @@ public class SysRegisterService {
 
         boolean exist = TenantHelper.dynamic(tenantId, () -> {
             return userMapper.exists(new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getUserName, sysUser.getUserName()));
+                    .eq(SysUser::getUserName, sysUser.getUserName()));
         });
         if (exist) {
             throw new UserException("user.register.save.error", username);

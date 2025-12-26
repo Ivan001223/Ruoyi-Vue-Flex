@@ -1,13 +1,12 @@
 package org.dromara.system.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.system.domain.SysRole;
 import org.dromara.system.domain.vo.SysRoleVo;
 
@@ -28,8 +27,8 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
      */
     default String buildRoleByUserSql(Long userId) {
         return """
-                select role_id from sys_user_role where user_id = %d
-            """.formatted(userId);
+                    select role_id from sys_user_role where user_id = %d
+                """.formatted(userId);
     }
 
     /**
@@ -40,10 +39,10 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
      * @return 包含角色信息的分页结果
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "create_dept"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "create_dept"),
+            @DataColumn(key = "userName", value = "create_by")
     })
-    default Page<SysRoleVo> selectPageRoleList(@Param("page") Page<SysRole> page, @Param(Constants.WRAPPER) Wrapper<SysRole> queryWrapper) {
+    default Page<SysRoleVo> selectPageRoleList(Page<SysRole> page, QueryWrapper queryWrapper) {
         return this.selectVoPage(page, queryWrapper);
     }
 
@@ -54,10 +53,10 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
      * @return 角色数据集合信息
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "create_dept"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "create_dept"),
+            @DataColumn(key = "userName", value = "create_by")
     })
-    default List<SysRoleVo> selectRoleList(@Param(Constants.WRAPPER) Wrapper<SysRole> queryWrapper) {
+    default List<SysRoleVo> selectRoleList(QueryWrapper queryWrapper) {
         return this.selectVoList(queryWrapper);
     }
 
@@ -68,8 +67,8 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
      * @return 匹配的角色数量
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "create_dept"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "create_dept"),
+            @DataColumn(key = "userName", value = "create_by")
     })
     default long selectRoleCount(List<Long> roleIds) {
         return this.selectCount(new LambdaQueryWrapper<SysRole>().in(SysRole::getRoleId, roleIds));
@@ -82,8 +81,8 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
      * @return 对应的角色信息
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "create_dept"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "create_dept"),
+            @DataColumn(key = "userName", value = "create_by")
     })
     default SysRoleVo selectRoleById(Long roleId) {
         return this.selectVoById(roleId);
@@ -97,9 +96,9 @@ public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
      */
     default List<SysRoleVo> selectRolesByUserId(Long userId) {
         return this.selectVoList(new LambdaQueryWrapper<SysRole>()
-            .select(SysRole::getRoleId, SysRole::getRoleName, SysRole::getRoleKey,
-                SysRole::getRoleSort, SysRole::getDataScope, SysRole::getStatus)
-            .inSql(SysRole::getRoleId, this.buildRoleByUserSql(userId)));
+                .select(SysRole::getRoleId, SysRole::getRoleName, SysRole::getRoleKey,
+                        SysRole::getRoleSort, SysRole::getDataScope, SysRole::getStatus)
+                .inSql(SysRole::getRoleId, this.buildRoleByUserSql(userId)));
     }
 
 }

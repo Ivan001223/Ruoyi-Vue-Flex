@@ -3,7 +3,7 @@ package org.dromara.web.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.Constants;
@@ -52,7 +52,8 @@ public class EmailAuthStrategy implements IAuthStrategy {
         String emailCode = loginBody.getEmailCode();
         LoginUser loginUser = TenantHelper.dynamic(tenantId, () -> {
             SysUserVo user = loadUserByEmail(email);
-            loginService.checkLogin(LoginType.EMAIL, tenantId, user.getUserName(), () -> !validateEmailCode(tenantId, email, emailCode));
+            loginService.checkLogin(LoginType.EMAIL, tenantId, user.getUserName(),
+                    () -> !validateEmailCode(tenantId, email, emailCode));
             // 此处可根据登录用户的数据不同 自行创建 loginUser 属性不够用继承扩展就行了
             return loginService.buildLoginUser(user);
         });
@@ -81,7 +82,8 @@ public class EmailAuthStrategy implements IAuthStrategy {
     private boolean validateEmailCode(String tenantId, String email, String emailCode) {
         String code = RedisUtils.getCacheObject(GlobalConstants.CAPTCHA_CODE_KEY + email);
         if (StringUtils.isBlank(code)) {
-            loginService.recordLogininfor(tenantId, email, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire"));
+            loginService.recordLogininfor(tenantId, email, Constants.LOGIN_FAIL,
+                    MessageUtils.message("user.jcaptcha.expire"));
             throw new CaptchaExpireException();
         }
         return code.equals(emailCode);

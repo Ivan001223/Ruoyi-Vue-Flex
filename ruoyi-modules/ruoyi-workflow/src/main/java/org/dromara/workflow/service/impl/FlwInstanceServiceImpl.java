@@ -4,11 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import cn.hutool.core.util.StrUtil;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.update.UpdateChain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.enums.BusinessStatusEnum;
@@ -52,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 流程实例 服务层实现
@@ -82,7 +83,7 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public TableDataInfo<FlowInstanceVo> selectRunningInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
-        QueryWrapper<FlowInstanceBo> queryWrapper = buildQueryWrapper(flowInstanceBo);
+        LambdaQueryWrapper<FlowInstanceBo> queryWrapper = buildQueryWrapper(flowInstanceBo);
         queryWrapper.in("fi.flow_status", BusinessStatusEnum.runningStatus());
         Page<FlowInstanceVo> page = flwInstanceMapper.selectInstanceList(pageQuery.build(), queryWrapper);
         return TableDataInfo.build(page);
@@ -96,7 +97,7 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public TableDataInfo<FlowInstanceVo> selectFinishInstanceList(FlowInstanceBo flowInstanceBo, PageQuery pageQuery) {
-        QueryWrapper<FlowInstanceBo> queryWrapper = buildQueryWrapper(flowInstanceBo);
+        LambdaQueryWrapper<FlowInstanceBo> queryWrapper = buildQueryWrapper(flowInstanceBo);
         queryWrapper.in("fi.flow_status", BusinessStatusEnum.finishStatus());
         Page<FlowInstanceVo> page = flwInstanceMapper.selectInstanceList(pageQuery.build(), queryWrapper);
         return TableDataInfo.build(page);
@@ -128,17 +129,23 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      * @param flowInstanceBo 查询条件
      * @return 查询条件构造方法
      */
-    private QueryWrapper<FlowInstanceBo> buildQueryWrapper(FlowInstanceBo flowInstanceBo) {
-        QueryWrapper<FlowInstanceBo> queryWrapper = Wrappers.query();
-        queryWrapper.like(StringUtils.isNotBlank(flowInstanceBo.getNodeName()), "fi.node_name", flowInstanceBo.getNodeName());
-        queryWrapper.like(StringUtils.isNotBlank(flowInstanceBo.getFlowName()), "fd.flow_name", flowInstanceBo.getFlowName());
-        queryWrapper.like(StringUtils.isNotBlank(flowInstanceBo.getFlowCode()), "fd.flow_code", flowInstanceBo.getFlowCode());
+    private LambdaQueryWrapper<FlowInstanceBo> buildQueryWrapper(FlowInstanceBo flowInstanceBo) {
+        LambdaQueryWrapper<FlowInstanceBo> queryWrapper = Wrappers.query();
+        queryWrapper.like(StringUtils.isNotBlank(flowInstanceBo.getNodeName()), "fi.node_name",
+                flowInstanceBo.getNodeName());
+        queryWrapper.like(StringUtils.isNotBlank(flowInstanceBo.getFlowName()), "fd.flow_name",
+                flowInstanceBo.getFlowName());
+        queryWrapper.like(StringUtils.isNotBlank(flowInstanceBo.getFlowCode()), "fd.flow_code",
+                flowInstanceBo.getFlowCode());
         if (StringUtils.isNotBlank(flowInstanceBo.getCategory())) {
-            List<Long> categoryIds = flwCategoryMapper.selectCategoryIdsByParentId(Convert.toLong(flowInstanceBo.getCategory()));
+            List<Long> categoryIds = flwCategoryMapper
+                    .selectCategoryIdsByParentId(Convert.toLong(flowInstanceBo.getCategory()));
             queryWrapper.in("fd.category", StreamUtils.toList(categoryIds, Convert::toStr));
         }
-        queryWrapper.eq(StringUtils.isNotBlank(flowInstanceBo.getBusinessId()), "fi.business_id", flowInstanceBo.getBusinessId());
-        queryWrapper.in(CollUtil.isNotEmpty(flowInstanceBo.getCreateByIds()), "fi.create_by", flowInstanceBo.getCreateByIds());
+        queryWrapper.eq(StringUtils.isNotBlank(flowInstanceBo.getBusinessId()), "fi.business_id",
+                flowInstanceBo.getBusinessId());
+        queryWrapper.in(CollUtil.isNotEmpty(flowInstanceBo.getCreateByIds()), "fi.create_by",
+                flowInstanceBo.getCreateByIds());
         queryWrapper.eq("fi.del_flag", "0");
         queryWrapper.orderByDesc("fi.create_time");
         return queryWrapper;
@@ -151,7 +158,8 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public FlowInstance selectInstByBusinessId(String businessId) {
-        return flowInstanceMapper.selectOne(new LambdaQueryWrapper<FlowInstance>().eq(FlowInstance::getBusinessId, businessId));
+        return flowInstanceMapper
+                .selectOne(Wrappers.<FlowInstance>lambdaQuery().eq(FlowInstance::getBusinessId, businessId));
     }
 
     /**
@@ -161,7 +169,7 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public FlowInstance selectInstById(Long instanceId) {
-        return flowInstanceMapper.selectById(instanceId);
+        return flowInstanceMapper.selectOneById(instanceId);
     }
 
     /**
@@ -171,7 +179,7 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public List<FlowInstance> selectInstListByIdList(List<Long> instanceIds) {
-        return flowInstanceMapper.selectByIds(instanceIds);
+        return flowInstanceMapper.selectListByIds(instanceIds);
     }
 
     /**
@@ -182,7 +190,8 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteByBusinessIds(List<String> businessIds) {
-        List<FlowInstance> flowInstances = flowInstanceMapper.selectList(new LambdaQueryWrapper<FlowInstance>().in(FlowInstance::getBusinessId, businessIds));
+        List<FlowInstance> flowInstances = flowInstanceMapper
+                .selectListByQuery(Wrappers.<FlowInstance>lambdaQuery().in(FlowInstance::getBusinessId, businessIds));
         if (CollUtil.isEmpty(flowInstances)) {
             log.warn("未找到对应的流程实例信息，无法执行删除操作。");
             return false;
@@ -206,10 +215,9 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
         }
         // 获取定义信息
         Map<Long, Definition> definitionMap = StreamUtils.toMap(
-            defService.getByIds(StreamUtils.toList(instances, Instance::getDefinitionId)),
-            Definition::getId,
-            Function.identity()
-        );
+                defService.getByIds(StreamUtils.toList(instances, Instance::getDefinitionId)),
+                Definition::getId,
+                Function.identity());
 
         // 逐一触发删除事件
         instances.forEach(instance -> {
@@ -240,10 +248,9 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
         }
         // 获取定义信息
         Map<Long, Definition> definitionMap = StreamUtils.toMap(
-            defService.getByIds(StreamUtils.toList(instances, Instance::getDefinitionId)),
-            Definition::getId,
-            Function.identity()
-        );
+                defService.getByIds(StreamUtils.toList(instances, Instance::getDefinitionId)),
+                Definition::getId,
+                Function.identity());
         // 逐一触发删除事件
         instances.forEach(instance -> {
             Definition definition = definitionMap.get(instance.getDefinitionId());
@@ -283,11 +290,11 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
         String userIdStr = LoginHelper.getUserIdStr();
         BusinessStatusEnum.checkCancelStatus(instance.getFlowStatus());
         FlowParams flowParams = FlowParams.build()
-            .message(message)
-            .flowStatus(BusinessStatusEnum.CANCEL.getStatus())
-            .hisStatus(BusinessStatusEnum.CANCEL.getStatus())
-            .handler(userIdStr)
-            .ignore(true);
+                .message(message)
+                .flowStatus(BusinessStatusEnum.CANCEL.getStatus())
+                .hisStatus(BusinessStatusEnum.CANCEL.getStatus())
+                .handler(userIdStr)
+                .ignore(true);
         taskService.revoke(instance.getId(), flowParams);
         return true;
     }
@@ -300,7 +307,7 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public TableDataInfo<FlowInstanceVo> selectCurrentInstanceList(FlowInstanceBo instanceBo, PageQuery pageQuery) {
-        QueryWrapper<FlowInstanceBo> queryWrapper = buildQueryWrapper(instanceBo);
+        LambdaQueryWrapper<FlowInstanceBo> queryWrapper = buildQueryWrapper(instanceBo);
         queryWrapper.eq("fi.create_by", LoginHelper.getUserIdStr());
         Page<FlowInstanceVo> page = flwInstanceMapper.selectInstanceList(pageQuery.build(), queryWrapper);
         return TableDataInfo.build(page);
@@ -326,7 +333,7 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
             runningTaskVos = BeanUtil.copyToList(runningTasks, FlowHisTaskVo.class);
 
             List<User> associatedUsers = FlowEngine.userService()
-                .getByAssociateds(StreamUtils.toList(runningTasks, FlowTask::getId));
+                    .getByAssociateds(StreamUtils.toList(runningTasks, FlowTask::getId));
             Map<Long, List<User>> taskUserMap = StreamUtils.groupByKey(associatedUsers, User::getAssociated);
 
             for (FlowHisTaskVo vo : runningTaskVos) {
@@ -343,12 +350,11 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
 
         // 再组装历史任务（已处理任务）
         List<FlowHisTaskVo> hisTaskVos = new ArrayList<>();
-        List<FlowHisTask> hisTasks = flowHisTaskMapper.selectList(
-            new LambdaQueryWrapper<FlowHisTask>()
-                .eq(FlowHisTask::getInstanceId, instanceId)
-                .eq(FlowHisTask::getNodeType, NodeType.BETWEEN.getKey())
-                .orderByDesc(FlowHisTask::getUpdateTime)
-        );
+        List<FlowHisTask> hisTasks = flowHisTaskMapper.selectListByQuery(
+                Wrappers.<FlowHisTask>lambdaQuery()
+                        .eq(FlowHisTask::getInstanceId, instanceId)
+                        .eq(FlowHisTask::getNodeType, NodeType.BETWEEN.getKey())
+                        .orderByDesc(FlowHisTask::getUpdateTime));
         if (CollUtil.isNotEmpty(hisTasks)) {
             hisTaskVos = BeanUtil.copyToList(hisTasks, FlowHisTaskVo.class);
         }
@@ -369,10 +375,10 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public void updateStatus(Long instanceId, String status) {
-        LambdaUpdateWrapper<FlowInstance> wrapper = new LambdaUpdateWrapper<>();
-        wrapper.set(FlowInstance::getFlowStatus, status);
-        wrapper.eq(FlowInstance::getId, instanceId);
-        flowInstanceMapper.update(wrapper);
+        UpdateChain.of(FlowInstance.class)
+                .set(FlowInstance::getFlowStatus, status)
+                .where(FlowInstance::getId).eq(instanceId)
+                .update();
     }
 
     /**
@@ -382,11 +388,12 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
      */
     @Override
     public Map<String, Object> instanceVariable(Long instanceId) {
-        FlowInstance flowInstance = flowInstanceMapper.selectById(instanceId);
-        Map<String, Object> variableMap = Optional.ofNullable(flowInstance.getVariableMap()).orElse(Collections.emptyMap());
+        FlowInstance flowInstance = flowInstanceMapper.selectOneById(instanceId);
+        Map<String, Object> variableMap = Optional.ofNullable(flowInstance.getVariableMap())
+                .orElse(Collections.emptyMap());
         List<Map<String, Object>> variableList = variableMap.entrySet().stream()
-            .map(entry -> Map.of("key", entry.getKey(), "value", entry.getValue()))
-            .toList();
+                .map(entry -> Map.of("key", entry.getKey(), "value", entry.getValue()))
+                .toList();
         return Map.of("variableList", variableList, "variable", flowInstance.getVariable());
     }
 
@@ -398,18 +405,19 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateVariable(FlowVariableBo bo) {
-        FlowInstance flowInstance = flowInstanceMapper.selectById(bo.getInstanceId());
+        FlowInstance flowInstance = flowInstanceMapper.selectOneById(bo.getInstanceId());
         if (flowInstance == null) {
             throw new ServiceException(ExceptionCons.NOT_FOUNT_INSTANCE);
         }
-        Map<String, Object> variableMap = new HashMap<>(Optional.ofNullable(flowInstance.getVariableMap()).orElse(Collections.emptyMap()));
+        Map<String, Object> variableMap = new HashMap<>(
+                Optional.ofNullable(flowInstance.getVariableMap()).orElse(Collections.emptyMap()));
         if (!variableMap.containsKey(bo.getKey())) {
             log.error("变量不存在: {}", bo.getKey());
             return false;
         }
         variableMap.put(bo.getKey(), bo.getValue());
         flowInstance.setVariable(FlowEngine.jsonConvert.objToStr(variableMap));
-        return flowInstanceMapper.updateById(flowInstance) > 0;
+        return flowInstanceMapper.update(flowInstance) > 0;
     }
 
     /**
@@ -459,10 +467,10 @@ public class FlwInstanceServiceImpl implements IFlwInstanceService {
             BusinessStatusEnum.checkInvalidStatus(instance.getFlowStatus());
         }
         FlowParams flowParams = FlowParams.build()
-            .message(bo.getComment())
-            .flowStatus(BusinessStatusEnum.INVALID.getStatus())
-            .hisStatus(TaskStatusEnum.INVALID.getStatus())
-            .ignore(true);
+                .message(bo.getComment())
+                .flowStatus(BusinessStatusEnum.INVALID.getStatus())
+                .hisStatus(TaskStatusEnum.INVALID.getStatus())
+                .ignore(true);
         taskService.terminationByInsId(bo.getId(), flowParams);
         return true;
     }

@@ -5,9 +5,9 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.domain.dto.StartProcessDTO;
@@ -131,7 +131,7 @@ public class TestLeaveServiceImpl implements ITestLeaveService {
             bo.setApplyCode(System.currentTimeMillis() + StrUtil.EMPTY);
         }
         TestLeave leave = MapstructUtils.convert(bo, TestLeave.class);
-        boolean flag = baseMapper.insertOrUpdate(leave);
+        boolean flag = baseMapper.saveOrUpdate(leave);
         if (flag) {
             bo.setId(leave.getId());
             // 后端发起需要忽略权限
@@ -169,7 +169,7 @@ public class TestLeaveServiceImpl implements ITestLeaveService {
     @Transactional(rollbackFor = Exception.class)
     public Boolean deleteWithValidByIds(List<Long> ids) {
         workflowService.deleteInstance(StreamUtils.toList(ids, Convert::toStr));
-        return baseMapper.deleteByIds(ids) > 0;
+        return baseMapper.deleteBatchIds(ids) > 0;
     }
 
     /**
@@ -209,7 +209,8 @@ public class TestLeaveServiceImpl implements ITestLeaveService {
 
     /**
      * 执行任务创建监听(也代表上一条任务完成事件)
-     * 示例：也可通过  @EventListener(condition = "#processTaskEvent.flowCode=='leave1'")进行判断
+     * 示例：也可通过 @EventListener(condition =
+     * "#processTaskEvent.flowCode=='leave1'")进行判断
      * 在方法中判断流程节点key
      * if ("xxx".equals(processTaskEvent.getNodeCode())) {
      * //执行业务逻辑

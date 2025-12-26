@@ -1,10 +1,10 @@
 package org.dromara.demo.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
 import org.dromara.demo.domain.TestTree;
 import org.dromara.demo.domain.bo.TestTreeBo;
 import org.dromara.demo.domain.vo.TestTreeVo;
@@ -48,7 +48,7 @@ public class TestTreeServiceImpl implements ITestTreeService {
         lqw.eq(bo.getUserId() != null, TestTree::getUserId, bo.getUserId());
         lqw.like(StringUtils.isNotBlank(bo.getTreeName()), TestTree::getTreeName, bo.getTreeName());
         lqw.between(params.get("beginCreateTime") != null && params.get("endCreateTime") != null,
-            TestTree::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
+                TestTree::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
         lqw.orderByAsc(TestTree::getId);
         return lqw;
     }
@@ -77,14 +77,14 @@ public class TestTreeServiceImpl implements ITestTreeService {
      * @param entity 实体类数据
      */
     private void validEntityBeforeSave(TestTree entity) {
-        //TODO 做一些数据校验,如唯一约束
+        // TODO 做一些数据校验,如唯一约束
     }
 
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
         if (isValid) {
-            //TODO 做一些业务上的校验,判断是否需要校验
+            // TODO 做一些业务上的校验,判断是否需要校验
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return baseMapper.deleteBatchByIds(ids) > 0;
     }
 }

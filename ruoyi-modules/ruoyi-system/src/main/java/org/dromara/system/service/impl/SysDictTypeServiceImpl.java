@@ -3,10 +3,8 @@ package org.dromara.system.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.update.UpdateChain;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.domain.dto.DictDataDTO;
@@ -19,6 +17,8 @@ import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
 import org.dromara.common.redis.utils.CacheUtils;
 import org.dromara.system.domain.SysDictData;
 import org.dromara.system.domain.SysDictType;
@@ -80,7 +80,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
         lqw.like(StringUtils.isNotBlank(bo.getDictName()), SysDictType::getDictName, bo.getDictName());
         lqw.like(StringUtils.isNotBlank(bo.getDictType()), SysDictType::getDictType, bo.getDictType());
         lqw.between(params.get("beginTime") != null && params.get("endTime") != null,
-            SysDictType::getCreateTime, params.get("beginTime"), params.get("endTime"));
+                SysDictType::getCreateTime, params.get("beginTime"), params.get("endTime"));
         lqw.orderByAsc(SysDictType::getDictId);
         return lqw;
     }
@@ -141,12 +141,12 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
         List<SysDictType> list = baseMapper.selectByIds(dictIds);
         list.forEach(x -> {
             boolean assigned = dictDataMapper.exists(new LambdaQueryWrapper<SysDictData>()
-                .eq(SysDictData::getDictType, x.getDictType()));
+                    .eq(SysDictData::getDictType, x.getDictType()));
             if (assigned) {
                 throw new ServiceException("{}已分配,不能删除", x.getDictName());
             }
         });
-        baseMapper.deleteByIds(dictIds);
+        baseMapper.deleteBatchIds(dictIds);
         list.forEach(x -> {
             CacheUtils.evict(CacheNames.SYS_DICT, x.getDictType());
             CacheUtils.evict(CacheNames.SYS_DICT_TYPE, x.getDictType());
@@ -192,9 +192,10 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
     public List<SysDictDataVo> updateDictType(SysDictTypeBo bo) {
         SysDictType dict = MapstructUtils.convert(bo, SysDictType.class);
         SysDictType oldDict = baseMapper.selectById(dict.getDictId());
-        dictDataMapper.update(null, new LambdaUpdateWrapper<SysDictData>()
-            .set(SysDictData::getDictType, dict.getDictType())
-            .eq(SysDictData::getDictType, oldDict.getDictType()));
+        UpdateChain.of(SysDictData.class)
+                .set(SysDictData::getDictType, dict.getDictType())
+                .eq(SysDictData::getDictType, oldDict.getDictType())
+                .update();
         int row = baseMapper.updateById(dict);
         if (row > 0) {
             CacheUtils.evict(CacheNames.SYS_DICT, oldDict.getDictType());
@@ -212,10 +213,12 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
      */
     @Override
     public boolean checkDictTypeUnique(SysDictTypeBo dictType) {
-        boolean exist = baseMapper.exists(new LambdaQueryWrapper<SysDictType>()
-            .eq(SysDictType::getDictType, dictType.getDictType())
-            .ne(ObjectUtil.isNotNull(dictType.getDictId()), SysDictType::getDictId, dictType.getDictId()));
-        return !exist;
+        LambdaQueryWrapper<SysDictType> lqw = new LambdaQueryWrapper<SysDictType>()
+                .eq(SysDictType::getDictType, dictType.getDictType());
+        if (ObjectUtil.isNotNull(dictType.getDictId())) {
+            lqw.ne(SysDictType::getDictId, dictType.getDictId());
+        }
+        return !baseMapper.exists(lqw);
     }
 
     /**
@@ -232,8 +235,8 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
         Map<String, String> map = StreamUtils.toMap(datas, SysDictDataVo::getDictValue, SysDictDataVo::getDictLabel);
         if (StringUtils.containsAny(dictValue, separator)) {
             return Arrays.stream(dictValue.split(separator))
-                .map(v -> map.getOrDefault(v, StringUtils.EMPTY))
-                .collect(Collectors.joining(separator));
+                    .map(v -> map.getOrDefault(v, StringUtils.EMPTY))
+                    .collect(Collectors.joining(separator));
         } else {
             return map.getOrDefault(dictValue, StringUtils.EMPTY);
         }
@@ -253,8 +256,8 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService, DictService 
         Map<String, String> map = StreamUtils.toMap(datas, SysDictDataVo::getDictLabel, SysDictDataVo::getDictValue);
         if (StringUtils.containsAny(dictLabel, separator)) {
             return Arrays.stream(dictLabel.split(separator))
-                .map(l -> map.getOrDefault(l, StringUtils.EMPTY))
-                .collect(Collectors.joining(separator));
+                    .map(l -> map.getOrDefault(l, StringUtils.EMPTY))
+                    .collect(Collectors.joining(separator));
         } else {
             return map.getOrDefault(dictLabel, StringUtils.EMPTY);
         }

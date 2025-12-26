@@ -1,13 +1,12 @@
 package org.dromara.system.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Constants;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.system.domain.SysUser;
 import org.dromara.system.domain.vo.SysUserExportVo;
 import org.dromara.system.domain.vo.SysUserVo;
@@ -29,10 +28,10 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      * @return 分页的用户信息
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "create_by")
     })
-    default Page<SysUserVo> selectPageUserList(Page<SysUser> page, Wrapper<SysUser> queryWrapper) {
+    default Page<SysUserVo> selectPageUserList(Page<SysUser> page, QueryWrapper queryWrapper) {
         return this.selectVoPage(page, queryWrapper);
     }
 
@@ -43,10 +42,10 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      * @return 用户信息集合
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "create_by")
     })
-    default List<SysUserVo> selectUserList(Wrapper<SysUser> queryWrapper) {
+    default List<SysUserVo> selectUserList(QueryWrapper queryWrapper) {
         return this.selectVoList(queryWrapper);
     }
 
@@ -57,10 +56,10 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      * @return 用户信息集合信息
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "d.dept_id"),
-        @DataColumn(key = "userName", value = "u.create_by")
+            @DataColumn(key = "deptName", value = "d.dept_id"),
+            @DataColumn(key = "userName", value = "u.create_by")
     })
-    List<SysUserExportVo> selectUserExportList(@Param(Constants.WRAPPER) Wrapper<SysUser> queryWrapper);
+    List<SysUserExportVo> selectUserExportList(@Param("ew") QueryWrapper queryWrapper);
 
     /**
      * 根据条件分页查询已配用户角色列表
@@ -70,10 +69,10 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      * @return 用户信息集合信息
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "d.dept_id"),
-        @DataColumn(key = "userName", value = "u.create_by")
+            @DataColumn(key = "deptName", value = "d.dept_id"),
+            @DataColumn(key = "userName", value = "u.create_by")
     })
-    Page<SysUserVo> selectAllocatedList(@Param("page") Page<SysUser> page, @Param(Constants.WRAPPER) Wrapper<SysUser> queryWrapper);
+    Page<SysUserVo> selectAllocatedList(@Param("page") Page<SysUser> page, @Param("ew") QueryWrapper queryWrapper);
 
     /**
      * 根据条件分页查询未分配用户角色列表
@@ -82,10 +81,10 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      * @return 用户信息集合信息
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "d.dept_id"),
-        @DataColumn(key = "userName", value = "u.create_by")
+            @DataColumn(key = "deptName", value = "d.dept_id"),
+            @DataColumn(key = "userName", value = "u.create_by")
     })
-    Page<SysUserVo> selectUnallocatedList(@Param("page") Page<SysUser> page, @Param(Constants.WRAPPER) Wrapper<SysUser> queryWrapper);
+    Page<SysUserVo> selectUnallocatedList(@Param("page") Page<SysUser> page, @Param("ew") QueryWrapper queryWrapper);
 
     /**
      * 根据用户ID统计用户数量
@@ -94,8 +93,8 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      * @return 用户数量
      */
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "create_by")
     })
     default long countUserById(Long userId) {
         return this.selectCount(new LambdaQueryWrapper<SysUser>().eq(SysUser::getUserId, userId));
@@ -110,10 +109,12 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      */
     @Override
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "create_by")
     })
-    int update(@Param(Constants.ENTITY) SysUser user, @Param(Constants.WRAPPER) Wrapper<SysUser> updateWrapper);
+    default int update(SysUser user, QueryWrapper updateWrapper) {
+        return BaseMapperPlus.super.update(user, updateWrapper);
+    }
 
     /**
      * 根据用户ID更新用户数据
@@ -123,9 +124,11 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
      */
     @Override
     @DataPermission({
-        @DataColumn(key = "deptName", value = "dept_id"),
-        @DataColumn(key = "userName", value = "create_by")
+            @DataColumn(key = "deptName", value = "dept_id"),
+            @DataColumn(key = "userName", value = "create_by")
     })
-    int updateById(@Param(Constants.ENTITY) SysUser user);
+    default int updateById(SysUser user) {
+        return BaseMapperPlus.super.updateById(user);
+    }
 
 }

@@ -1,14 +1,14 @@
 package org.dromara.demo.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.exception.ServiceException;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.Wrappers;
 import org.dromara.demo.domain.TestDemo;
 import org.dromara.demo.domain.bo.TestDemoBo;
 import org.dromara.demo.domain.vo.TestDemoVo;
@@ -67,7 +67,7 @@ public class TestDemoServiceImpl implements ITestDemoService {
         lqw.like(StringUtils.isNotBlank(bo.getTestKey()), TestDemo::getTestKey, bo.getTestKey());
         lqw.eq(StringUtils.isNotBlank(bo.getValue()), TestDemo::getValue, bo.getValue());
         lqw.between(params.get("beginCreateTime") != null && params.get("endCreateTime") != null,
-            TestDemo::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
+                TestDemo::getCreateTime, params.get("beginCreateTime"), params.get("endCreateTime"));
         lqw.orderByAsc(TestDemo::getId);
         return lqw;
     }
@@ -96,7 +96,7 @@ public class TestDemoServiceImpl implements ITestDemoService {
      * @param entity 实体类数据
      */
     private void validEntityBeforeSave(TestDemo entity) {
-        //TODO 做一些数据校验,如唯一约束
+        // TODO 做一些数据校验,如唯一约束
     }
 
     @Override
@@ -108,11 +108,11 @@ public class TestDemoServiceImpl implements ITestDemoService {
                 throw new ServiceException("您没有删除权限!");
             }
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return baseMapper.deleteBatchByIds(ids) > 0;
     }
 
     @Override
     public Boolean saveBatch(List<TestDemo> list) {
-        return baseMapper.insertBatch(list);
+        return baseMapper.insertBatch(list) > 0;
     }
 }
