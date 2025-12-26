@@ -2,9 +2,8 @@ package org.dromara.system.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.exception.ServiceException;
@@ -72,7 +71,7 @@ public class SysTenantPackageServiceImpl implements ISysTenantPackageService {
     }
 
     private LambdaQueryWrapper<SysTenantPackage> buildQueryWrapper(SysTenantPackageBo bo) {
-        LambdaQueryWrapper<SysTenantPackage> lqw = Wrappers.lambdaQuery();
+        LambdaQueryWrapper<SysTenantPackage> lqw = new LambdaQueryWrapper<>();
         lqw.like(StringUtils.isNotBlank(bo.getPackageName()), SysTenantPackage::getPackageName, bo.getPackageName());
         lqw.eq(StringUtils.isNotBlank(bo.getStatus()), SysTenantPackage::getStatus, bo.getStatus());
         lqw.orderByAsc(SysTenantPackage::getPackageId);
@@ -144,6 +143,6 @@ public class SysTenantPackageServiceImpl implements ISysTenantPackageService {
                 throw new ServiceException("租户套餐已被使用");
             }
         }
-        return baseMapper.deleteByIds(ids) > 0;
+        return baseMapper.deleteBatchByIds(ids) > 0;
     }
 }

@@ -3,8 +3,8 @@ package org.dromara.system.service.impl;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.http.useragent.UserAgent;
 import cn.hutool.http.useragent.UserAgentUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import com.mybatisflex.core.paginate.Page;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -169,7 +169,7 @@ public class SysLogininforServiceImpl implements ISysLogininforService {
      */
     @Override
     public int deleteLogininforByIds(Long[] infoIds) {
-        return baseMapper.deleteByIds(Arrays.asList(infoIds));
+        return baseMapper.deleteBatchByIds(Arrays.asList(infoIds));
     }
 
     /**
@@ -177,6 +177,6 @@ public class SysLogininforServiceImpl implements ISysLogininforService {
      */
     @Override
     public void cleanLogininfor() {
-        baseMapper.delete(new LambdaQueryWrapper<>());
+        baseMapper.deleteByQuery(new LambdaQueryWrapper<>());
     }
 }

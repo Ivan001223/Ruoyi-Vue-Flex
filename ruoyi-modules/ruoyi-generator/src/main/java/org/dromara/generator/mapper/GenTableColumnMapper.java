@@ -1,7 +1,6 @@
 package org.dromara.generator.mapper;
 
-import com.baomidou.mybatisplus.annotation.InterceptorIgnore;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.generator.domain.GenTableColumn;
 
 /**
@@ -9,7 +8,6 @@ import org.dromara.generator.domain.GenTableColumn;
  *
  * @author Lion Li
  */
-@InterceptorIgnore(dataPermission = "true", tenantLine = "true")
-public interface GenTableColumnMapper extends BaseMapperPlus<GenTableColumn, GenTableColumn> {
+public interface GenTableColumnMapper extends BaseMapperFlex<GenTableColumn, GenTableColumn> {
 
 }

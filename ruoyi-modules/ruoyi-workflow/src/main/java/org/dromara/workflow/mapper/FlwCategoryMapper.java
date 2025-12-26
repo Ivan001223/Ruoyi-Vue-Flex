@@ -1,6 +1,6 @@
 package org.dromara.workflow.mapper;
 
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.common.mybatis.helper.DataBaseHelper;
 import org.dromara.workflow.domain.FlowCategory;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
  * @author may
  * @date 2023-06-27
  */
-public interface FlwCategoryMapper extends BaseMapperPlus<FlowCategory, FlowCategoryVo> {
+public interface FlwCategoryMapper extends BaseMapperFlex<FlowCategory, FlowCategoryVo> {
 
     /**
      * 根据父流程分类ID查询其所有子流程分类的列表

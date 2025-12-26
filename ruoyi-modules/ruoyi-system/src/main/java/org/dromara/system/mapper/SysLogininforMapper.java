@@ -1,6 +1,6 @@
 package org.dromara.system.mapper;
 
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.system.domain.SysLogininfor;
 import org.dromara.system.domain.vo.SysLogininforVo;
 
@@ -9,6 +9,6 @@ import org.dromara.system.domain.vo.SysLogininforVo;
  *
  * @author Lion Li
  */
-public interface SysLogininforMapper extends BaseMapperPlus<SysLogininfor, SysLogininforVo> {
+public interface SysLogininforMapper extends BaseMapperFlex<SysLogininfor, SysLogininforVo> {
 
 }

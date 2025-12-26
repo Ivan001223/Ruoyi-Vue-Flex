@@ -1,7 +1,7 @@
 package org.dromara.system.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.system.domain.SysDictData;
 import org.dromara.system.domain.vo.SysDictDataVo;
 
@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface SysDictDataMapper extends BaseMapperPlus<SysDictData, SysDictDataVo> {
+public interface SysDictDataMapper extends BaseMapperFlex<SysDictData, SysDictDataVo> {
 
     /**
      * 根据字典类型查询字典数据列表

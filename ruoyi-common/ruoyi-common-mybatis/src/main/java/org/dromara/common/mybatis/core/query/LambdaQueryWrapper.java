@@ -221,27 +221,49 @@ public class LambdaQueryWrapper<E> extends QueryWrapper {
         return this;
     }
 
-    public <T> LambdaQueryWrapper<E> orderByAsc(LambdaGetter<T> column) {
-        super.orderBy(QueryMethods.column(column).asc());
-        return this;
-    }
-
-    public <T> LambdaQueryWrapper<E> orderByAsc(boolean condition, LambdaGetter<T> column) {
-        if (condition) {
-            super.orderBy(QueryMethods.column(column).asc());
+    @SafeVarargs
+    public final <T> LambdaQueryWrapper<E> orderByAsc(LambdaGetter<T>... columns) {
+        if (ObjectUtil.isNotEmpty(columns)) {
+            for (LambdaGetter<T> column : columns) {
+                super.orderBy(QueryMethods.column(column).asc());
+            }
         }
         return this;
     }
 
-    public <T> LambdaQueryWrapper<E> orderByDesc(LambdaGetter<T> column) {
-        super.orderBy(QueryMethods.column(column).desc());
+    @SafeVarargs
+    public final <T> LambdaQueryWrapper<E> orderByAsc(boolean condition, LambdaGetter<T>... columns) {
+        if (condition && ObjectUtil.isNotEmpty(columns)) {
+            for (LambdaGetter<T> column : columns) {
+                super.orderBy(QueryMethods.column(column).asc());
+            }
+        }
         return this;
     }
 
-    public <T> LambdaQueryWrapper<E> orderByDesc(boolean condition, LambdaGetter<T> column) {
-        if (condition) {
-            super.orderBy(QueryMethods.column(column).desc());
+    @SafeVarargs
+    public final <T> LambdaQueryWrapper<E> orderByDesc(LambdaGetter<T>... columns) {
+        if (ObjectUtil.isNotEmpty(columns)) {
+            for (LambdaGetter<T> column : columns) {
+                super.orderBy(QueryMethods.column(column).desc());
+            }
         }
+        return this;
+    }
+
+    @SafeVarargs
+    public final <T> LambdaQueryWrapper<E> orderByDesc(boolean condition, LambdaGetter<T>... columns) {
+        if (condition && ObjectUtil.isNotEmpty(columns)) {
+            for (LambdaGetter<T> column : columns) {
+                super.orderBy(QueryMethods.column(column).desc());
+            }
+        }
+        return this;
+    }
+
+    public <T> LambdaQueryWrapper<E> notInSql(LambdaGetter<T> column, String sql) {
+        String columnName = QueryMethods.column(column).getName();
+        super.and(columnName + " NOT IN (" + sql + ")");
         return this;
     }
 

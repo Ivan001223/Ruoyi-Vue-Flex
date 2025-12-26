@@ -154,7 +154,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
             row = baseMapper.updateById(config);
         } else {
             CacheUtils.evict(CacheNames.SYS_CONFIG, config.getConfigKey());
-            row = baseMapper.update(config, new LambdaQueryWrapper<SysConfig>()
+            row = baseMapper.updateByQuery(config, new LambdaQueryWrapper<SysConfig>()
                     .eq(SysConfig::getConfigKey, config.getConfigKey()));
         }
         if (row > 0) {
@@ -177,7 +177,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
             }
             CacheUtils.evict(CacheNames.SYS_CONFIG, config.getConfigKey());
         });
-        baseMapper.deleteBatchIds(configIds);
+        baseMapper.deleteBatchByIds(configIds);
     }
 
     /**
@@ -201,7 +201,7 @@ public class SysConfigServiceImpl implements ISysConfigService, ConfigService {
         if (ObjectUtil.isNotNull(config.getConfigId())) {
             lqw.ne(SysConfig::getConfigId, config.getConfigId());
         }
-        return !baseMapper.exists(lqw);
+        return baseMapper.selectCount(lqw) == 0;
     }
 
     /**

@@ -47,6 +47,11 @@
 
         <dependency>
             <groupId>org.dromara</groupId>
+            <artifactId>ruoyi-common-mybatis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.dromara</groupId>
             <artifactId>ruoyi-common-doc</artifactId>
         </dependency>
 
@@ -82,16 +87,16 @@
         </dependency>
 
         <!--  demo模块  -->
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-demo</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.dromara</groupId>-->
+<!--            <artifactId>ruoyi-demo</artifactId>-->
+<!--        </dependency>-->
 
         <!--  工作流模块  -->
-        <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-workflow</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.dromara</groupId>-->
+<!--            <artifactId>ruoyi-workflow</artifactId>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>de.codecentric</groupId>
@@ -122,9 +127,41 @@
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>${spring-boot.version}</version>
+                        </path>
+                        <path>
+                            <groupId>io.github.linpeilie</groupId>
+                            <artifactId>mapstruct-plus-processor</artifactId>
+                            <version>${mapstruct-plus.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>${mapstruct-plus.lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
+                <configuration>
+                    <mainClass>org.dromara.DromaraApplication</mainClass>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

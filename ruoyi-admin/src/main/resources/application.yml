@@ -136,23 +136,15 @@ tenant:
     - sys_oss_config
     - flow_spel
 
-# MyBatisPlus配置
-# https://baomidou.com/config/
-mybatis-plus:
-  # 自定义配置 是否全局开启逻辑删除 关闭后 所有逻辑删除功能将失效
-  enableLogicDelete: true
+# MyBatis-Flex配置
+mybatis-flex:
   # 多包名使用 例如 org.dromara.**.mapper,org.xxx.**.mapper
-  mapperPackage: org.dromara.**.mapper
+  mapper-package: org.dromara.**.mapper
   # 对应的 XML 文件位置
-  mapperLocations: classpath*:mapper/**/*Mapper.xml
+  mapper-locations: classpath*:mapper/**/*Mapper.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: org.dromara.**.domain
-  global-config:
-    dbConfig:
-      # 主键类型
-      # AUTO 自增 NONE 空 INPUT 用户输入 ASSIGN_ID 雪花 ASSIGN_UUID 唯一 UUID
-      # 如需改为自增 需要将数据库表全部设置为自增
-      idType: ASSIGN_ID
+  type-aliases-package: org.dromara.**.domain
+
 
 # 数据加密
 mybatis-encryptor:

@@ -5,7 +5,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.system.domain.SysUser;
 import org.dromara.system.domain.vo.SysUserExportVo;
@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
+public interface SysUserMapper extends BaseMapperFlex<SysUser, SysUserVo> {
 
     /**
      * 分页查询用户列表，并进行数据权限控制
@@ -112,8 +112,8 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
             @DataColumn(key = "deptName", value = "dept_id"),
             @DataColumn(key = "userName", value = "create_by")
     })
-    default int update(SysUser user, QueryWrapper updateWrapper) {
-        return BaseMapperPlus.super.update(user, updateWrapper);
+    default int updateByQuery(SysUser user, QueryWrapper updateWrapper) {
+        return BaseMapperFlex.super.updateByQuery(user, updateWrapper);
     }
 
     /**
@@ -128,7 +128,7 @@ public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
             @DataColumn(key = "userName", value = "create_by")
     })
     default int updateById(SysUser user) {
-        return BaseMapperPlus.super.updateById(user);
+        return BaseMapperFlex.super.updateById(user);
     }
 
 }

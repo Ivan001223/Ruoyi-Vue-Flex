@@ -24,9 +24,9 @@ import java.util.List;
  * @since 2021-05-13
  */
 @SuppressWarnings("unchecked")
-public interface BaseMapperPlus<T, V> extends BaseMapper<T> {
+public interface BaseMapperFlex<T, V> extends BaseMapper<T> {
 
-    Log log = LogFactory.getLog(BaseMapperPlus.class);
+    Log log = LogFactory.getLog(BaseMapperFlex.class);
 
     default Class<V> currentVoClass() {
         return (Class<V>) TypeUtil.getTypeArgument(this.getClass(), 1);
@@ -190,6 +190,21 @@ public interface BaseMapperPlus<T, V> extends BaseMapper<T> {
 
     default <P extends Page<V>> P selectVoPage(Page<T> page, QueryWrapper wrapper) {
         return selectVoPage(page, wrapper, this.currentVoClass());
+    }
+
+    default List<Object> selectObjs(QueryWrapper wrapper) {
+        return this.selectListByQueryAs(wrapper, Object.class);
+    }
+
+    default <R> List<R> selectObjectList(QueryWrapper wrapper, Class<R> clazz) {
+        return this.selectListByQueryAs(wrapper, clazz);
+    }
+
+    default Page<T> selectPage(Page<T> page, QueryWrapper wrapper) {
+        if (page instanceof org.dromara.common.mybatis.core.page.FlexPage) {
+            ((org.dromara.common.mybatis.core.page.FlexPage<T>) page).sort(wrapper);
+        }
+        return this.paginate(page, wrapper);
     }
 
     default <C, P extends Page<C>> P selectVoPage(Page<T> page, QueryWrapper wrapper, Class<C> voClass) {

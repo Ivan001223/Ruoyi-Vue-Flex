@@ -1,11 +1,11 @@
 package org.dromara.system.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.system.domain.SysPost;
 import org.dromara.system.domain.vo.SysPostVo;
 
@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface SysPostMapper extends BaseMapperPlus<SysPost, SysPostVo> {
+public interface SysPostMapper extends BaseMapperFlex<SysPost, SysPostVo> {
 
     /**
      * 分页查询岗位列表
@@ -29,7 +29,7 @@ public interface SysPostMapper extends BaseMapperPlus<SysPost, SysPostVo> {
         @DataColumn(key = "deptName", value = "dept_id"),
         @DataColumn(key = "userName", value = "create_by")
     })
-    default Page<SysPostVo> selectPagePostList(Page<SysPost> page, Wrapper<SysPost> queryWrapper) {
+    default Page<SysPostVo> selectPagePostList(Page<SysPost> page, QueryWrapper queryWrapper) {
         return this.selectVoPage(page, queryWrapper);
     }
 
@@ -43,7 +43,7 @@ public interface SysPostMapper extends BaseMapperPlus<SysPost, SysPostVo> {
         @DataColumn(key = "deptName", value = "dept_id"),
         @DataColumn(key = "userName", value = "create_by")
     })
-    default List<SysPostVo> selectPostList(Wrapper<SysPost> queryWrapper) {
+    default List<SysPostVo> selectPostList(QueryWrapper queryWrapper) {
         return this.selectVoList(queryWrapper);
     }
 

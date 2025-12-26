@@ -5,7 +5,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.demo.domain.TestDemo;
 import org.dromara.demo.domain.vo.TestDemoVo;
 
@@ -19,7 +19,7 @@ import java.util.List;
  * @author Lion Li
  * @date 2021-07-26
  */
-public interface TestDemoMapper extends BaseMapperPlus<TestDemo, TestDemoVo> {
+public interface TestDemoMapper extends BaseMapperFlex<TestDemo, TestDemoVo> {
 
     @DataPermission({
             @DataColumn(key = "deptName", value = "dept_id"),
@@ -57,7 +57,7 @@ public interface TestDemoMapper extends BaseMapperPlus<TestDemo, TestDemoVo> {
             @DataColumn(key = "deptName", value = "dept_id"),
             @DataColumn(key = "userName", value = "user_id")
     })
-    int update(@Param("et") TestDemo entity, @Param("ew") QueryWrapper queryWrapper);
+    int updateByQuery(@Param("et") TestDemo entity, @Param("ew") QueryWrapper queryWrapper);
     // Note: MP had updateById(entity). Flex has update(entity).
     // If we want to override update by ID specifically? Flex BaseMapper has
     // update(entity).

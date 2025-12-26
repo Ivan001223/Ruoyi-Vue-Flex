@@ -1,13 +1,13 @@
 package org.dromara.common.encrypt.config;
 
-import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
-import com.baomidou.mybatisplus.autoconfigure.MybatisPlusProperties;
+import com.mybatisflex.spring.boot.MybatisFlexAutoConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.encrypt.core.EncryptorManager;
 import org.dromara.common.encrypt.interceptor.MybatisDecryptInterceptor;
 import org.dromara.common.encrypt.interceptor.MybatisEncryptInterceptor;
 import org.dromara.common.encrypt.properties.EncryptorProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean;
  * @author 老马
  * @version 4.6.0
  */
-@AutoConfiguration(after = MybatisPlusAutoConfiguration.class)
+@AutoConfiguration(after = MybatisFlexAutoConfiguration.class)
 @EnableConfigurationProperties(EncryptorProperties.class)
 @ConditionalOnProperty(value = "mybatis-encryptor.enable", havingValue = "true")
 @Slf4j
@@ -28,9 +28,12 @@ public class EncryptorAutoConfiguration {
     @Autowired
     private EncryptorProperties properties;
 
+    @Value("${mybatis-flex.type-aliases-package:}")
+    private String typeAliasesPackage;
+
     @Bean
-    public EncryptorManager encryptorManager(MybatisPlusProperties mybatisPlusProperties) {
-        return new EncryptorManager(mybatisPlusProperties.getTypeAliasesPackage());
+    public EncryptorManager encryptorManager() {
+        return new EncryptorManager(typeAliasesPackage);
     }
 
     @Bean
@@ -44,6 +47,3 @@ public class EncryptorAutoConfiguration {
     }
 
 }
-
-
-

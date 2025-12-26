@@ -1,7 +1,7 @@
 package org.dromara.generator.mapper;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.generator.domain.GenTable;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface GenTableMapper extends BaseMapperPlus<GenTable, GenTable> {
+public interface GenTableMapper extends BaseMapperFlex<GenTable, GenTable> {
 
     /**
      * 查询所有表信息

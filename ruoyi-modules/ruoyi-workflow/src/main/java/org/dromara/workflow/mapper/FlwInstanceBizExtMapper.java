@@ -2,7 +2,7 @@ package org.dromara.workflow.mapper;
 
 import cn.hutool.core.util.ObjectUtil;
 import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.workflow.domain.FlowInstanceBizExt;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
  * @author may
  * @date 2025-08-05
  */
-public interface FlwInstanceBizExtMapper extends BaseMapperPlus<FlowInstanceBizExt, FlowInstanceBizExt> {
+public interface FlwInstanceBizExtMapper extends BaseMapperFlex<FlowInstanceBizExt, FlowInstanceBizExt> {
 
     /**
      * 根据 instanceId 保存或更新流程实例业务扩展

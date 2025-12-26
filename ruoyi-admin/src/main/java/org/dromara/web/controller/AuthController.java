@@ -183,18 +183,18 @@ public class AuthController {
         return R.ok("退出成功");
     }
 
-    /**
-     * 用户注册
-     */
-    @ApiEncrypt
-    @PostMapping("/register")
-    public R<Void> register(@Validated @RequestBody RegisterBody user) {
-        if (!configService.selectRegisterEnabled(user.getTenantId())) {
-            return R.fail("当前系统没有开启注册功能！");
-        }
-        registerService.register(user);
-        return R.ok();
-    }
+//    /**
+//     * 用户注册
+//     */
+//    @ApiEncrypt
+//    @PostMapping("/register")
+//    public R<Void> register(@Validated @RequestBody RegisterBody user) {
+//        if (!configService.selectRegisterEnabled(user.getTenantId())) {
+//            return R.fail("当前系统没有开启注册功能！");
+//        }
+//        registerService.register(user);
+//        return R.ok();
+//    }
 
     /**
      * 登录页面租户下拉框

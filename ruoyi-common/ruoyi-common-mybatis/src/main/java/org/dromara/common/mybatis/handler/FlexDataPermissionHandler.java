@@ -3,7 +3,7 @@ package org.dromara.common.mybatis.handler;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.mybatisflex.core.FlexGlobalConfig;
-import com.mybatisflex.core.handler.DataPermissionHandler;
+// import com.mybatisflex.core.handler.DataPermissionHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.mapping.MappedStatement;
@@ -34,7 +34,7 @@ import java.util.function.Function;
  * @author Lion Li
  */
 @Slf4j
-public class FlexDataPermissionHandler implements DataPermissionHandler {
+public class FlexDataPermissionHandler {
 
     /**
      * spel 解析器
@@ -46,7 +46,7 @@ public class FlexDataPermissionHandler implements DataPermissionHandler {
      */
     private final BeanResolver beanResolver = new BeanFactoryResolver(SpringUtils.getBeanFactory());
 
-    @Override
+    // @Override
     public String getSqlCondition(String tableName, String[] tableAlias, String logicTableName, String methodId) {
         // 检查是否忽略
         if (DataPermissionHelper.isIgnore()) {

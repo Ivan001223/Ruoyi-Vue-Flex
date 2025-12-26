@@ -1,8 +1,10 @@
 package org.dromara.system.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.common.core.constant.Constants;
@@ -21,13 +23,13 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_menu")
+@Table("sys_menu")
 public class SysMenu extends BaseEntity {
 
     /**
      * 菜单ID
      */
-    @TableId(value = "menu_id")
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long menuId;
 
     /**
@@ -103,13 +105,13 @@ public class SysMenu extends BaseEntity {
     /**
      * 父菜单名称
      */
-    @TableField(exist = false)
+    @Column(ignore = true)
     private String parentName;
 
     /**
      * 子菜单
      */
-    @TableField(exist = false)
+    @Column(ignore = true)
     private List<SysMenu> children = new ArrayList<>();
 
     /**

@@ -2,9 +2,9 @@ package org.dromara.system.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import com.mybatisflex.core.query.QueryWrapper;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.exception.ServiceException;
@@ -112,7 +112,7 @@ public class SysPostServiceImpl implements ISysPostService, PostService {
      */
     @Override
     public List<SysPostVo> selectPostAll() {
-        return baseMapper.selectVoList(new QueryWrapper<>());
+        return baseMapper.selectVoList(new QueryWrapper());
     }
 
     /**
@@ -228,7 +228,7 @@ public class SysPostServiceImpl implements ISysPostService, PostService {
                 throw new ServiceException("{}已分配，不能删除!", post.getPostName());
             }
         }
-        return baseMapper.deleteByIds(postIds);
+        return baseMapper.deleteBatchByIds(postIds);
     }
 
     /**

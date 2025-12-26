@@ -22,7 +22,7 @@ public class MybatisFlexConfig implements MyBatisFlexCustomizer {
         globalConfig.registerUpdateListener(handler, Object.class);
 
         // 注册数据权限处理器
-        globalConfig.setDataPermissionHandler(new FlexDataPermissionHandler());
+        // globalConfig.setDataPermissionHandler(new FlexDataPermissionHandler());
 
         // 注册逻辑删除配置 (如果需要动态配置)
         // globalConfig.setLogicDeleteColumn("del_flag");

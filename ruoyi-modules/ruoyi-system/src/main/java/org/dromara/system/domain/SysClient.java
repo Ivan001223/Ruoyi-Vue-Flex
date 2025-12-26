@@ -1,9 +1,13 @@
 package org.dromara.system.domain;
 
-import org.dromara.common.mybatis.core.domain.BaseEntity;
-import com.baomidou.mybatisplus.annotation.*;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.common.mybatis.core.domain.BaseEntity;
 
 import java.io.Serial;
 
@@ -15,7 +19,7 @@ import java.io.Serial;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_client")
+@Table("sys_client")
 public class SysClient extends BaseEntity {
 
     @Serial
@@ -24,7 +28,7 @@ public class SysClient extends BaseEntity {
     /**
      * id
      */
-    @TableId(value = "id")
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long id;
 
     /**
@@ -70,7 +74,7 @@ public class SysClient extends BaseEntity {
     /**
      * 删除标志（0代表存在 1代表删除）
      */
-    @TableLogic
+    @Column(isLogicDelete = true)
     private String delFlag;
 
 

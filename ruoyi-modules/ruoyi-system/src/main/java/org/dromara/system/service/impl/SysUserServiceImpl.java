@@ -168,7 +168,7 @@ public class SysUserServiceImpl implements ISysUserService, UserService {
         List<Long> userIds = userRoleMapper.selectUserIdsByRoleId(user.getRoleId());
         QueryWrapper wrapper = Wrappers.query();
         wrapper.eq("u.del_flag", SystemConstants.NORMAL)
-                .and(w -> w.ne("r.role_id", user.getRoleId()).or().isNull("r.role_id"));
+                .and("r.role_id <> ? OR r.role_id IS NULL", user.getRoleId());
 
         if (CollUtil.isNotEmpty(userIds)) {
             wrapper.notIn("u.user_id", userIds);

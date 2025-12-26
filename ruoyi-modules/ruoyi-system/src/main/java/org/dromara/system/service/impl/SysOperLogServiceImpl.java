@@ -1,8 +1,8 @@
 package org.dromara.system.service.impl;
 
 import cn.hutool.core.util.ArrayUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.utils.MapstructUtils;
 import org.dromara.common.core.utils.StringUtils;
@@ -117,7 +117,7 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
      */
     @Override
     public int deleteOperLogByIds(Long[] operIds) {
-        return baseMapper.deleteByIds(Arrays.asList(operIds));
+        return baseMapper.deleteBatchByIds(Arrays.asList(operIds));
     }
 
     /**
@@ -136,6 +136,6 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
      */
     @Override
     public void cleanOperLog() {
-        baseMapper.delete(new LambdaQueryWrapper<>());
+        baseMapper.deleteByQuery(new LambdaQueryWrapper<>());
     }
 }

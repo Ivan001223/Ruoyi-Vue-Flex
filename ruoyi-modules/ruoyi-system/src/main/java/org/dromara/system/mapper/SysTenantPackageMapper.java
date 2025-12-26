@@ -1,6 +1,6 @@
 package org.dromara.system.mapper;
 
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.system.domain.SysTenantPackage;
 import org.dromara.system.domain.vo.SysTenantPackageVo;
 
@@ -9,6 +9,6 @@ import org.dromara.system.domain.vo.SysTenantPackageVo;
  *
  * @author Michelle.Chung
  */
-public interface SysTenantPackageMapper extends BaseMapperPlus<SysTenantPackage, SysTenantPackageVo> {
+public interface SysTenantPackageMapper extends BaseMapperFlex<SysTenantPackage, SysTenantPackageVo> {
 
 }

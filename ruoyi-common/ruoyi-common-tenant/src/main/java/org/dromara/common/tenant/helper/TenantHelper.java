@@ -2,18 +2,14 @@ package org.dromara.common.tenant.helper;
 
 import cn.dev33.satoken.context.SaHolder;
 import cn.dev33.satoken.context.model.SaStorage;
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.convert.Convert;
-import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.plugins.IgnoreStrategy;
-import com.baomidou.mybatisplus.core.plugins.InterceptorIgnoreHelper;
+import com.mybatisflex.core.tenant.TenantManager;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.GlobalConstants;
 import org.dromara.common.core.utils.SpringUtils;
 import org.dromara.common.core.utils.StringUtils;
-import org.dromara.common.core.utils.reflect.ReflectUtils;
 import org.dromara.common.redis.utils.RedisUtils;
 import org.dromara.common.satoken.utils.LoginHelper;
 
@@ -42,26 +38,10 @@ public class TenantHelper {
         return Convert.toBool(SpringUtils.getProperty("tenant.enable"), false);
     }
 
-    private static IgnoreStrategy getIgnoreStrategy() {
-        Object ignoreStrategyLocal = ReflectUtils.getStaticFieldValue(ReflectUtils.getField(InterceptorIgnoreHelper.class, "IGNORE_STRATEGY_LOCAL"));
-        if (ignoreStrategyLocal instanceof ThreadLocal<?> IGNORE_STRATEGY_LOCAL) {
-            if (IGNORE_STRATEGY_LOCAL.get() instanceof IgnoreStrategy ignoreStrategy) {
-                return ignoreStrategy;
-            }
-        }
-        return null;
-    }
-
     /**
      * 开启忽略租户(开启后需手动调用 {@link #disableIgnore()} 关闭)
      */
-    private static void enableIgnore() {
-        IgnoreStrategy ignoreStrategy = getIgnoreStrategy();
-        if (ObjectUtil.isNull(ignoreStrategy)) {
-            InterceptorIgnoreHelper.handle(IgnoreStrategy.builder().tenantLine(true).build());
-        } else {
-            ignoreStrategy.setTenantLine(true);
-        }
+    public static void enableIgnore() {
         Stack<Integer> reentrantStack = REENTRANT_IGNORE.get();
         reentrantStack.push(reentrantStack.size() + 1);
     }
@@ -69,22 +49,18 @@ public class TenantHelper {
     /**
      * 关闭忽略租户
      */
-    private static void disableIgnore() {
-        IgnoreStrategy ignoreStrategy = getIgnoreStrategy();
-        if (ObjectUtil.isNotNull(ignoreStrategy)) {
-            boolean noOtherIgnoreStrategy = !Boolean.TRUE.equals(ignoreStrategy.getDynamicTableName())
-                && !Boolean.TRUE.equals(ignoreStrategy.getBlockAttack())
-                && !Boolean.TRUE.equals(ignoreStrategy.getIllegalSql())
-                && !Boolean.TRUE.equals(ignoreStrategy.getDataPermission())
-                && CollectionUtil.isEmpty(ignoreStrategy.getOthers());
-            Stack<Integer> reentrantStack = REENTRANT_IGNORE.get();
-            boolean empty = reentrantStack.isEmpty() || reentrantStack.pop() == 1;
-            if (noOtherIgnoreStrategy && empty) {
-                InterceptorIgnoreHelper.clearIgnoreStrategy();
-            } else if (empty) {
-                ignoreStrategy.setTenantLine(false);
-            }
+    public static void disableIgnore() {
+        Stack<Integer> reentrantStack = REENTRANT_IGNORE.get();
+        if (!reentrantStack.isEmpty()) {
+            reentrantStack.pop();
         }
+    }
+
+    /**
+     * 是否忽略租户
+     */
+    public static boolean isIgnore() {
+        return !REENTRANT_IGNORE.get().isEmpty();
     }
 
     /**
@@ -95,7 +71,7 @@ public class TenantHelper {
     public static void ignore(Runnable handle) {
         enableIgnore();
         try {
-            handle.run();
+            TenantManager.withoutTenantCondition(handle);
         } finally {
             disableIgnore();
         }
@@ -109,7 +85,7 @@ public class TenantHelper {
     public static <T> T ignore(Supplier<T> handle) {
         enableIgnore();
         try {
-            return handle.get();
+            return TenantManager.withoutTenantCondition(handle);
         } finally {
             disableIgnore();
         }

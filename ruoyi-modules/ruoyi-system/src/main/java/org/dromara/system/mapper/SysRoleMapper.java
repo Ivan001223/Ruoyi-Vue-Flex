@@ -5,7 +5,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.system.domain.SysRole;
 import org.dromara.system.domain.vo.SysRoleVo;
@@ -17,7 +17,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
+public interface SysRoleMapper extends BaseMapperFlex<SysRole, SysRoleVo> {
 
     /**
      * 构建根据用户ID查询角色ID的SQL子查询

@@ -1,6 +1,6 @@
 package org.dromara.system.mapper;
 
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.system.domain.SysOperLog;
 import org.dromara.system.domain.vo.SysOperLogVo;
 
@@ -9,6 +9,6 @@ import org.dromara.system.domain.vo.SysOperLogVo;
  *
  * @author Lion Li
  */
-public interface SysOperLogMapper extends BaseMapperPlus<SysOperLog, SysOperLogVo> {
+public interface SysOperLogMapper extends BaseMapperFlex<SysOperLog, SysOperLogVo> {
 
 }

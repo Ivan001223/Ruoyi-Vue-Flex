@@ -1,8 +1,10 @@
 package org.dromara.system.domain;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.keygen.KeyGenerators;
 import org.dromara.common.mybatis.core.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,7 +19,7 @@ import java.util.Date;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_tenant")
+@Table("sys_tenant")
 public class SysTenant extends BaseEntity {
 
     @Serial
@@ -26,7 +28,7 @@ public class SysTenant extends BaseEntity {
     /**
      * id
      */
-    @TableId(value = "id")
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long id;
 
     /**
@@ -97,7 +99,7 @@ public class SysTenant extends BaseEntity {
     /**
      * 删除标志（0代表存在 1代表删除）
      */
-    @TableLogic
+    @Column(isLogicDelete = true)
     private String delFlag;
 
 }

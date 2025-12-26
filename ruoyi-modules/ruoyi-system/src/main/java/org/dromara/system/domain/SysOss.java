@@ -1,7 +1,9 @@
 package org.dromara.system.domain;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.keygen.KeyGenerators;
 import org.dromara.common.tenant.core.TenantEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -13,13 +15,13 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_oss")
+@Table("sys_oss")
 public class SysOss extends TenantEntity {
 
     /**
      * 对象存储主键
      */
-    @TableId(value = "oss_id")
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long ossId;
 
     /**

@@ -1,9 +1,10 @@
 package org.dromara.system.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Column;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.dromara.common.tenant.core.TenantEntity;
@@ -20,7 +21,7 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_dept")
+@Table("sys_dept")
 public class SysDept extends TenantEntity {
 
     @Serial
@@ -29,7 +30,7 @@ public class SysDept extends TenantEntity {
     /**
      * 部门ID
      */
-    @TableId(value = "dept_id")
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long deptId;
 
     /**
@@ -75,7 +76,7 @@ public class SysDept extends TenantEntity {
     /**
      * 删除标志（0代表存在 1代表删除）
      */
-    @TableLogic
+    @Column(isLogicDelete = true)
     private String delFlag;
 
     /**
@@ -86,7 +87,7 @@ public class SysDept extends TenantEntity {
     /**
      * 子部门
      */
-    @TableField(exist = false)
+    @Column(ignore = true)
     private List<SysDept> children = new ArrayList<>();
 
 }

@@ -1,7 +1,7 @@
 package org.dromara.system.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.system.domain.SysUserRole;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface SysUserRoleMapper extends BaseMapperPlus<SysUserRole, SysUserRole> {
+public interface SysUserRoleMapper extends BaseMapperFlex<SysUserRole, SysUserRole> {
 
     /**
      * 根据角色ID查询关联的用户ID列表
@@ -22,7 +22,7 @@ public interface SysUserRoleMapper extends BaseMapperPlus<SysUserRole, SysUserRo
     default List<Long> selectUserIdsByRoleId(Long roleId) {
         return this.selectObjs(new LambdaQueryWrapper<SysUserRole>()
             .select(SysUserRole::getUserId).eq(SysUserRole::getRoleId, roleId)
-        );
+        ).stream().map(o -> (Long)o).toList();
     }
 
 }

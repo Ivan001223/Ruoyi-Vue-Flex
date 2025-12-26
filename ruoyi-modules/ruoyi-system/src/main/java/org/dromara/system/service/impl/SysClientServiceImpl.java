@@ -3,10 +3,8 @@ package org.dromara.system.service.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.crypto.SecureUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dromara.common.core.constant.CacheNames;
@@ -79,7 +77,7 @@ public class SysClientServiceImpl implements ISysClientService {
     }
 
     private LambdaQueryWrapper<SysClient> buildQueryWrapper(SysClientBo bo) {
-        LambdaQueryWrapper<SysClient> lqw = Wrappers.lambdaQuery();
+        LambdaQueryWrapper<SysClient> lqw = new LambdaQueryWrapper<>();
         lqw.eq(StringUtils.isNotBlank(bo.getClientId()), SysClient::getClientId, bo.getClientId());
         lqw.eq(StringUtils.isNotBlank(bo.getClientKey()), SysClient::getClientKey, bo.getClientKey());
         lqw.eq(StringUtils.isNotBlank(bo.getClientSecret()), SysClient::getClientSecret, bo.getClientSecret());
@@ -123,9 +121,10 @@ public class SysClientServiceImpl implements ISysClientService {
     @CacheEvict(cacheNames = CacheNames.SYS_CLIENT, key = "#clientId")
     @Override
     public int updateClientStatus(String clientId, String status) {
-        return baseMapper.update(null,
-            new LambdaUpdateWrapper<SysClient>()
-                .set(SysClient::getStatus, status)
+        SysClient client = new SysClient();
+        client.setStatus(status);
+        return baseMapper.updateByQuery(client,
+            new LambdaQueryWrapper<SysClient>()
                 .eq(SysClient::getClientId, clientId));
     }
 
@@ -135,7 +134,7 @@ public class SysClientServiceImpl implements ISysClientService {
     @CacheEvict(cacheNames = CacheNames.SYS_CLIENT, allEntries = true)
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        return baseMapper.deleteByIds(ids) > 0;
+        return baseMapper.deleteBatchByIds(ids) > 0;
     }
 
     /**

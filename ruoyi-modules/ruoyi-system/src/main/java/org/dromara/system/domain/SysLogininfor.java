@@ -1,7 +1,9 @@
 package org.dromara.system.domain;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.mybatisflex.annotation.Id;
+import com.mybatisflex.annotation.KeyType;
+import com.mybatisflex.annotation.Table;
+import com.mybatisflex.core.keygen.KeyGenerators;
 import lombok.Data;
 
 import java.io.Serial;
@@ -15,7 +17,7 @@ import java.util.Date;
  */
 
 @Data
-@TableName("sys_logininfor")
+@Table("sys_logininfor")
 public class SysLogininfor implements Serializable {
 
     @Serial
@@ -24,7 +26,7 @@ public class SysLogininfor implements Serializable {
     /**
      * ID
      */
-    @TableId(value = "info_id")
+    @Id(keyType = KeyType.Generator, value = KeyGenerators.snowFlakeId)
     private Long infoId;
 
     /**

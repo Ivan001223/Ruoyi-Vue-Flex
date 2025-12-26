@@ -1,9 +1,8 @@
 package org.dromara.system.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
+import com.mybatisflex.core.paginate.Page;
 import lombok.RequiredArgsConstructor;
 import org.dromara.common.core.constant.CacheNames;
 import org.dromara.common.core.exception.ServiceException;
@@ -60,7 +59,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
     }
 
     private LambdaQueryWrapper<SysDictData> buildQueryWrapper(SysDictDataBo bo) {
-        LambdaQueryWrapper<SysDictData> lqw = Wrappers.lambdaQuery();
+        LambdaQueryWrapper<SysDictData> lqw = new LambdaQueryWrapper<>();
         lqw.eq(bo.getDictSort() != null, SysDictData::getDictSort, bo.getDictSort());
         lqw.like(StringUtils.isNotBlank(bo.getDictLabel()), SysDictData::getDictLabel, bo.getDictLabel());
         lqw.eq(StringUtils.isNotBlank(bo.getDictType()), SysDictData::getDictType, bo.getDictType());
@@ -103,7 +102,7 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
     @Override
     public void deleteDictDataByIds(List<Long> dictCodes) {
         List<SysDictData> list = baseMapper.selectByIds(dictCodes);
-        baseMapper.deleteByIds(dictCodes);
+        baseMapper.deleteBatchByIds(dictCodes);
         list.forEach(x -> CacheUtils.evict(CacheNames.SYS_DICT, x.getDictType()));
     }
 

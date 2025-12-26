@@ -1,12 +1,12 @@
 package org.dromara.system.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.mybatisflex.core.paginate.Page;
+import com.mybatisflex.core.query.QueryWrapper;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.mybatis.annotation.DataColumn;
 import org.dromara.common.mybatis.annotation.DataPermission;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.common.mybatis.helper.DataBaseHelper;
 import org.dromara.system.domain.SysDept;
 import org.dromara.system.domain.vo.SysDeptVo;
@@ -18,7 +18,7 @@ import java.util.List;
  *
  * @author Lion Li
  */
-public interface SysDeptMapper extends BaseMapperPlus<SysDept, SysDeptVo> {
+public interface SysDeptMapper extends BaseMapperFlex<SysDept, SysDeptVo> {
 
     /**
      * 构建角色对应的部门 SQL 查询语句
@@ -65,7 +65,7 @@ public interface SysDeptMapper extends BaseMapperPlus<SysDept, SysDeptVo> {
     @DataPermission({
         @DataColumn(key = "deptName", value = "dept_id")
     })
-    default List<SysDeptVo> selectDeptList(Wrapper<SysDept> queryWrapper) {
+    default List<SysDeptVo> selectDeptList(QueryWrapper queryWrapper) {
         return this.selectVoList(queryWrapper);
     }
 
@@ -79,7 +79,7 @@ public interface SysDeptMapper extends BaseMapperPlus<SysDept, SysDeptVo> {
     @DataPermission({
         @DataColumn(key = "deptName", value = "dept_id"),
     })
-    default Page<SysDeptVo> selectPageDeptList(Page<SysDept> page, Wrapper<SysDept> queryWrapper) {
+    default Page<SysDeptVo> selectPageDeptList(Page<SysDept> page, QueryWrapper queryWrapper) {
         return this.selectVoPage(page, queryWrapper);
     }
 
@@ -137,7 +137,7 @@ public interface SysDeptMapper extends BaseMapperPlus<SysDept, SysDeptVo> {
         if (deptCheckStrictly) {
             wrapper.notInSql(SysDept::getDeptId, this.buildParentDeptByRoleSql(roleId));
         }
-        return this.selectObjs(wrapper);
+        return this.selectObjs(wrapper).stream().map(o -> (Long)o).toList();
     }
 
 }

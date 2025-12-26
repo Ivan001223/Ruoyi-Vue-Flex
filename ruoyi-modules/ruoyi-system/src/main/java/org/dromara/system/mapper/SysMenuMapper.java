@@ -1,10 +1,10 @@
 package org.dromara.system.mapper;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.dromara.common.mybatis.core.query.LambdaQueryWrapper;
 import org.dromara.common.core.constant.SystemConstants;
 import org.dromara.common.core.utils.StreamUtils;
 import org.dromara.common.core.utils.StringUtils;
-import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
+import org.dromara.common.mybatis.core.mapper.BaseMapperFlex;
 import org.dromara.system.domain.SysMenu;
 import org.dromara.system.domain.vo.SysMenuVo;
 
@@ -17,7 +17,7 @@ import java.util.Set;
  *
  * @author Lion Li
  */
-public interface SysMenuMapper extends BaseMapperPlus<SysMenu, SysMenuVo> {
+public interface SysMenuMapper extends BaseMapperFlex<SysMenu, SysMenuVo> {
 
     /**
      * 构建用户权限菜单 SQL
@@ -86,13 +86,13 @@ public interface SysMenuMapper extends BaseMapperPlus<SysMenu, SysMenuVo> {
      * @return 权限列表
      */
     default Set<String> selectMenuPermsByUserId(Long userId) {
-        List<String> list = this.selectObjs(
+        List<Object> list = this.selectObjs(
             new LambdaQueryWrapper<SysMenu>()
                 .select(SysMenu::getPerms)
                 .inSql(SysMenu::getMenuId, this.buildMenuByUserSql(userId))
                 .isNotNull(SysMenu::getPerms)
         );
-        return new HashSet<>(StreamUtils.filter(list, StringUtils::isNotBlank));
+        return new HashSet<>(StreamUtils.filter(list.stream().map(Object::toString).toList(), StringUtils::isNotBlank));
     }
 
     /**
@@ -102,13 +102,13 @@ public interface SysMenuMapper extends BaseMapperPlus<SysMenu, SysMenuVo> {
      * @return 权限列表
      */
     default Set<String> selectMenuPermsByRoleId(Long roleId) {
-        List<String> list = this.selectObjs(
+        List<Object> list = this.selectObjs(
             new LambdaQueryWrapper<SysMenu>()
                 .select(SysMenu::getPerms)
                 .inSql(SysMenu::getMenuId, this.buildMenuByRoleSql(roleId))
                 .isNotNull(SysMenu::getPerms)
         );
-        return new HashSet<>(StreamUtils.filter(list, StringUtils::isNotBlank));
+        return new HashSet<>(StreamUtils.filter(list.stream().map(Object::toString).toList(), StringUtils::isNotBlank));
     }
 
     /**
@@ -141,7 +141,7 @@ public interface SysMenuMapper extends BaseMapperPlus<SysMenu, SysMenuVo> {
         if (menuCheckStrictly) {
             wrapper.notInSql(SysMenu::getMenuId, this.buildParentMenuByRoleSql(roleId));
         }
-        return this.selectObjs(wrapper);
+        return this.selectObjs(wrapper).stream().map(o -> (Long)o).toList();
     }
 
 }
