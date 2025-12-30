@@ -139,7 +139,7 @@ tenant:
 # MyBatis-Flex配置
 mybatis-flex:
   # 多包名使用 例如 org.dromara.**.mapper,org.xxx.**.mapper
-  mapper-package: org.dromara.**.mapper
+  mapper-package: org.dromara.system.mapper,org.dromara.demo.mapper,org.dromara.generator.mapper,org.dromara.workflow.mapper
   # 对应的 XML 文件位置
   mapper-locations: classpath*:mapper/**/*Mapper.xml
   # 实体扫描，多个package用逗号或者分号分隔

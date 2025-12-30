@@ -3,6 +3,7 @@ package org.dromara.web.controller;
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -76,7 +77,6 @@ public class AuthController {
     private final ISysClientService clientService;
     private final ScheduledExecutorService scheduledExecutorService;
 
-
     /**
      * 登录方法
      *
@@ -122,7 +122,7 @@ public class AuthController {
      */
     @GetMapping("/binding/{source}")
     public R<String> authBinding(@PathVariable("source") String source,
-                                 @RequestParam String tenantId, @RequestParam String domain) {
+            @RequestParam String tenantId, @RequestParam String domain) {
         SocialLoginConfigProperties obj = socialProperties.getType().get(source);
         if (ObjectUtil.isNull(obj)) {
             return R.fail(source + "平台账号暂不支持");
@@ -148,8 +148,8 @@ public class AuthController {
         StpUtil.checkLogin();
         // 获取第三方登录信息
         AuthResponse<AuthUser> response = SocialUtils.loginAuth(
-            loginBody.getSource(), loginBody.getSocialCode(),
-            loginBody.getSocialState(), socialProperties);
+                loginBody.getSource(), loginBody.getSocialCode(),
+                loginBody.getSocialState(), socialProperties);
         AuthUser authUserData = response.getData();
         // 判断授权响应是否成功
         if (!response.ok()) {
@@ -158,7 +158,6 @@ public class AuthController {
         loginService.socialRegister(authUserData);
         return R.ok();
     }
-
 
     /**
      * 取消授权(需要token)
@@ -173,7 +172,6 @@ public class AuthController {
         return rows ? R.ok() : R.fail("取消授权失败");
     }
 
-
     /**
      * 退出登录
      */
@@ -183,18 +181,18 @@ public class AuthController {
         return R.ok("退出成功");
     }
 
-//    /**
-//     * 用户注册
-//     */
-//    @ApiEncrypt
-//    @PostMapping("/register")
-//    public R<Void> register(@Validated @RequestBody RegisterBody user) {
-//        if (!configService.selectRegisterEnabled(user.getTenantId())) {
-//            return R.fail("当前系统没有开启注册功能！");
-//        }
-//        registerService.register(user);
-//        return R.ok();
-//    }
+    // /**
+    // * 用户注册
+    // */
+    // @ApiEncrypt
+    // @PostMapping("/register")
+    // public R<Void> register(@Validated @RequestBody RegisterBody user) {
+    // if (!configService.selectRegisterEnabled(user.getTenantId())) {
+    // return R.fail("当前系统没有开启注册功能！");
+    // }
+    // registerService.register(user);
+    // return R.ok();
+    // }
 
     /**
      * 登录页面租户下拉框
@@ -214,7 +212,7 @@ public class AuthController {
         }
 
         List<SysTenantVo> tenantList = tenantService.queryList(new SysTenantBo());
-        List<TenantListVo> voList = MapstructUtils.convert(tenantList, TenantListVo.class);
+        List<TenantListVo> voList = BeanUtil.copyToList(tenantList, TenantListVo.class);
         try {
             // 如果只超管返回所有租户
             if (LoginHelper.isSuperAdmin()) {
@@ -234,8 +232,7 @@ public class AuthController {
             host = new URL(request.getRequestURL().toString()).getHost();
         }
         // 根据域名进行筛选
-        List<TenantListVo> list = StreamUtils.filter(voList, vo ->
-            StringUtils.equalsIgnoreCase(vo.getDomain(), host));
+        List<TenantListVo> list = StreamUtils.filter(voList, vo -> StringUtils.equalsIgnoreCase(vo.getDomain(), host));
         result.setVoList(CollUtil.isNotEmpty(list) ? list : voList);
         return R.ok(result);
     }
